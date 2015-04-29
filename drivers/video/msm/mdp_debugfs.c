@@ -661,7 +661,7 @@ static int mddi_reg_read(int ndx)
 
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_ON, FALSE);
 	while (reg->name) {
-		data = readl((u32)base + reg->off);
+		data = readl(IOMEM((u32)base + reg->off));
 		len = snprintf(bp, dlen, "%s:0x%08x\t\t= 0x%08x\n",
 					reg->name, reg->off, data);
 		tot += len;
@@ -1082,7 +1082,7 @@ static ssize_t dbg_reg_read(
 		off = 0;
 		i = 0;
 		while (i++ < 4) {
-			data = readl(cp + off);
+			data = readl(IOMEM(cp + off));
 			len = snprintf(bp, dlen, "%08x ", data);
 			tot += len;
 			bp += len;
@@ -1092,7 +1092,7 @@ static ssize_t dbg_reg_read(
 			if (num >= dbg_count)
 				break;
 		}
-		data = readl((u32)cp + off);
+		data = readl(IOMEM((u32)cp + off));
 		*bp++ = '\n';
 		--dlen;
 		tot++;
