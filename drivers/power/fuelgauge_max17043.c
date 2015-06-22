@@ -361,7 +361,7 @@ static irqreturn_t fg_interrupt_handler(int irq, void *data)	// ALARM_INT
 }
 #endif
 
-static int __devinit fg_i2c_probe(struct i2c_client *client,
+static int fg_i2c_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
 {
 	struct i2c_adapter *adapter = to_i2c_adapter(client->dev.parent);
@@ -399,7 +399,7 @@ static int __devinit fg_i2c_probe(struct i2c_client *client,
 	return 0;
 }
 
-static int __devexit fg_i2c_remove(struct i2c_client *client)
+static int fg_i2c_remove(struct i2c_client *client)
 {
 	struct max17040_chip *chip = i2c_get_clientdata(client);
 
@@ -427,7 +427,7 @@ static struct i2c_driver fg_i2c_driver = {
 		.name	= "fuelgauge_max17043",
 	},
 	.probe		= fg_i2c_probe,
-	.remove		= __devexit_p(fg_i2c_remove),
+	.remove		= fg_i2c_remove,
 	.suspend	= fg_i2c_suspend,
 	.resume		= fg_i2c_resume,
 	.id_table	= fg_i2c_id,

@@ -2462,7 +2462,7 @@ int set_tsp_for_ta_detect(int state)
 }
 EXPORT_SYMBOL(set_tsp_for_ta_detect);
 
-static int __devexit melfas_mcs8000_i2c_remove(struct i2c_client *client)
+static int melfas_mcs8000_i2c_remove(struct i2c_client *client)
 {
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	unregister_early_suspend(&melfas_mcs8000_ts->early_suspend);

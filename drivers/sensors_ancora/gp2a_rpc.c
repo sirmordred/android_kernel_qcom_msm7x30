@@ -106,7 +106,7 @@ void msm_lightsensor_cleanup(void)
 }
 EXPORT_SYMBOL(msm_lightsensor_cleanup);
 
-int __devinit msm_lightsensor_init_rpc(void)
+int msm_lightsensor_init_rpc(void)
 {
   	int rc = 0;
 

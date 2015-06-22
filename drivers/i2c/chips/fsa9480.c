@@ -1304,7 +1304,7 @@ exit_check_functionality_failed:
 }
 
 	
-static int __devexit fsa9480_remove(struct i2c_client *client)
+static int fsa9480_remove(struct i2c_client *client)
 {
 	struct fsa9480_data *mt;
 
@@ -1333,7 +1333,7 @@ static int fsa9480_resume(struct i2c_client *client)
 
 static struct i2c_driver fsa9480_driver = {
 	.probe 		= fsa9480_probe,
-	.remove		= __devexit_p(fsa9480_remove),
+	.remove		= fsa9480_remove,
 	.resume		= fsa9480_resume,
 	.id_table	= fsa9480_id,
 	.driver = {

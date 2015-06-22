@@ -2486,7 +2486,7 @@ static int check_quick_start(void)
 }
 #endif
 
-static int __devinit msm_batt_probe(struct platform_device *pdev)
+static int msm_batt_probe(struct platform_device *pdev)
 {
 	int rc;
 	struct msm_psy_batt_pdata *pdata = pdev->dev.platform_data;
@@ -2649,7 +2649,7 @@ static int __devinit msm_batt_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int __devexit msm_batt_remove(struct platform_device *pdev)
+static int msm_batt_remove(struct platform_device *pdev)
 {
 	int rc;
 	rc = msm_batt_cleanup();
@@ -2677,7 +2677,7 @@ static const struct dev_pm_ops msm_bat_pm_ops = {
 
 static struct platform_driver msm_batt_driver = {
 	.probe = msm_batt_probe,
-	.remove = __devexit_p(msm_batt_remove),
+	.remove = msm_batt_remove,
 	.driver = {
 		   .name = "ancora-battery",
 		   .shutdown = msm_batt_shutdown,
@@ -2685,7 +2685,7 @@ static struct platform_driver msm_batt_driver = {
 		   },
 };
 
-static int __devinit msm_batt_init_rpc(void)
+static int msm_batt_init_rpc(void)
 {
 	int rc;
 

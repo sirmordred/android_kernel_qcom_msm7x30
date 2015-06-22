@@ -32,7 +32,7 @@ static struct platform_driver msm_vibrator_platdrv =
 	.probe   = msm_vibrator_probe,
 	.suspend = msm_vibrator_suspend,
 	.resume  = msm_vibrator_resume,
-	.remove  = __devexit_p(msm_vibrator_exit),
+	.remove  = msm_vibrator_exit,
 	.driver = 
 	{
 			.name = MODULE_NAME,
@@ -52,7 +52,7 @@ static int msm_vibrator_resume(struct platform_device *pdev) {
 	return VIBE_S_SUCCESS;
 }
 
-static int __devexit msm_vibrator_exit(struct platform_device *pdev) {
+static int msm_vibrator_exit(struct platform_device *pdev) {
 		pr_info("[VIB] EXIT\n");
 		return 0;
 }
@@ -170,7 +170,7 @@ static struct timed_output_dev pmic_vibrator = {
 	.enable = vibrator_enable,
 };
 
-static int __devinit msm_vibrator_probe(struct platform_device *pdev) {
+static int msm_vibrator_probe(struct platform_device *pdev) {
 
 	int rc;
 

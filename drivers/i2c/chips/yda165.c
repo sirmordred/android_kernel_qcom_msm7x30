@@ -1631,7 +1631,7 @@ static struct miscdevice amp_device = {
 	.fops = &amp_fops,
 };
 
-static int __devinit yda165_probe(struct i2c_client *client, const struct i2c_device_id * dev_id)
+static int yda165_probe(struct i2c_client *client, const struct i2c_device_id * dev_id)
 {
 	int err = 0;
 	
@@ -1670,14 +1670,14 @@ exit_sysfs_create_group_failed:
 	return err;
 }
 
-static int __devexit yda165_remove(struct i2c_client *client)
+static int yda165_remove(struct i2c_client *client)
 {
 	pclient = NULL;
 
 	return 0;
 }
 
-static void __devexit yda165_shutdown(struct i2c_client *client)
+static void yda165_shutdown(struct i2c_client *client)
 {
 	pr_info(MODULE_NAME ": %s : amp power off\n", __func__);
 
