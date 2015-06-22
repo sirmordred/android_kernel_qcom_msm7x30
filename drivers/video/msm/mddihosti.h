@@ -73,7 +73,7 @@ do { \
 		__addr = (u32)msm_pmdh_base + MDDI_##reg; \
 	else \
 		__addr = (u32)msm_emdh_base + MDDI_##reg; \
-	writel((readl(IOMEM(__addr)) & ~(mask)) | ((val) & (mask)), IOMEM(__addr)); \
+	writel((readl(__addr) & ~(mask)) | ((val) & (mask)), __addr); \
 } while (0)
 
 #define xxxx_mddi_host_reg_out(reg, val) \
@@ -87,9 +87,9 @@ do { \
 #define mddi_host_reg_out(reg, val) \
 do { \
 	if (host_idx == MDDI_HOST_PRIM) \
-		writel(val, IOMEM((u32)msm_pmdh_base + MDDI_##reg)); \
+		writel(val, (u32)msm_pmdh_base + MDDI_##reg); \
 	else \
-		writel(val, IOMEM((u32)msm_emdh_base + MDDI_##reg)); \
+		writel(val, (u32)msm_emdh_base + MDDI_##reg); \
 } while (0)
 
 #define xxxx_mddi_host_reg_in(reg)  \
@@ -98,8 +98,8 @@ do { \
 
 #define mddi_host_reg_in(reg) \
 ((host_idx) ? \
-	readl(IOMEM((u32)msm_emdh_base + MDDI_##reg)) : \
-	readl(IOMEM((u32)msm_pmdh_base + MDDI_##reg))) \
+	readl((u32)msm_emdh_base + MDDI_##reg) : \
+	readl((u32)msm_pmdh_base + MDDI_##reg)) \
 
 #define xxxx_mddi_host_reg_inm(reg, mask)  \
   ((host_idx) ? \
@@ -108,8 +108,8 @@ do { \
 
 #define mddi_host_reg_inm(reg, mask) \
 ((host_idx) ? \
-	readl(IOMEM((u32)msm_emdh_base + MDDI_##reg)) & (mask) : \
-	readl(IOMEM((u32)msm_pmdh_base + MDDI_##reg)) & (mask)) \
+	readl((u32)msm_emdh_base + MDDI_##reg) & (mask) : \
+	readl((u32)msm_pmdh_base + MDDI_##reg) & (mask)) \
 
 /* Using non-cacheable pmem, so do nothing */
 #define mddi_invalidate_cache_lines(addr_start, num_bytes)
@@ -144,16 +144,12 @@ do { \
 * significantly increasing latency of waiting for next subframe */
 #define MDDI_HOST_BYTES_PER_SUBFRAME  0x3C00
 
-#if defined(CONFIG_FB_MSM_MDP40)
+#if defined(CONFIG_FB_MSM_MDP31) || defined(CONFIG_FB_MSM_MDP40)
 #define MDDI_HOST_TA2_LEN       0x001a
 #define MDDI_HOST_REV_RATE_DIV  0x0004
 #else
 #define MDDI_HOST_TA2_LEN       0x000c
 #define MDDI_HOST_REV_RATE_DIV  0x0002
-#endif
-
-#ifdef CONFIG_MACH_SEMC
-#define MDDI_ACCESS_PKT_REG_DATA_EXT 126
 #endif
 
 #define MDDI_MSG_EMERG(msg, ...)    \
@@ -378,46 +374,7 @@ typedef struct GCC_PACKED {
 	/* list of 4-byte register data values for/from client registers */
 	/* For multi-read/write, 512(128 * 4) bytes of data available */
 
-#ifdef CONFIG_MACH_SEMC
-#ifndef ENABLE_MDDI_MULTI_READ_WRITE
-	uint32 register_data_list_ext[4];
-#endif
-#endif
 } mddi_register_access_packet_type;
-
-#ifdef CONFIG_MACH_SEMC
-typedef struct GCC_PACKED {
-	uint16 packet_length;
-	/* total # of bytes in the packet not including the packet_length field. */
-
-	uint16 packet_type;
-	/* A Packet Type of 146 identifies the packet as a Register Access Packet. */
-
-	uint16 bClient_ID;
-	/* This field is reserved for future use and shall be set to zero. */
-
-	uint16 read_write_info;
-	/* Bits 13:0  a 14-bit unsigned integer that specifies the number of
-	 *            32-bit Register Data List items to be transferred in the
-	 *            Register Data List field.
-	 * Bits[15:14] = 00  Write to register(s);
-	 * Bits[15:14] = 10  Read from register(s);
-	 * Bits[15:14] = 11  Response to a Read.
-	 * Bits[15:14] = 01  this value is reserved for future use. */
-
-	uint32 register_address;
-	/* the register address that is to be written to or read from. */
-
-	uint16 parameter_CRC;
-	/* 16-bit CRC of all bytes from the Packet Length to the Register Address. */
-
-	uint32 register_data_list;
-	/* list of 4-byte register data values for/from client registers */
-
-	uint32 register_data_list_ext[MDDI_ACCESS_PKT_REG_DATA_EXT];
-	/* SEMC Added parameters */
-} mddi_register_access_packet_xl_type;
-#endif
 
 typedef union GCC_PACKED {
 	mddi_video_stream_packet_type video_pkt;
@@ -430,9 +387,6 @@ typedef union GCC_PACKED {
 	/* add 48 byte pad to ensure 64 byte llist struct, that can be
 	 * manipulated easily with cache */
 	uint32 alignment_pad[12];	/* 48 bytes */
-#ifdef CONFIG_MACH_SEMC
-	mddi_register_access_packet_xl_type register_xl_pkt;
-#endif
 #endif
 } mddi_packet_header_type;
 
@@ -457,11 +411,7 @@ typedef struct {
 #ifdef ENABLE_MDDI_MULTI_READ_WRITE
 #define MDDI_LLIST_POOL_SIZE 0x10000
 #else
-#ifdef CONFIG_MACH_SEMC
-#define MDDI_LLIST_POOL_SIZE 0x8000
-#else
 #define MDDI_LLIST_POOL_SIZE 0x1000
-#endif
 #endif
 #define MDDI_MAX_NUM_LLIST_ITEMS (MDDI_LLIST_POOL_SIZE / \
 		 sizeof(mddi_linked_list_type))

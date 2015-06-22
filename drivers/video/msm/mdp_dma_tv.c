@@ -19,6 +19,8 @@
 #include <linux/interrupt.h>
 #include <linux/hrtimer.h>
 #include <linux/delay.h>
+
+#include <mach/hardware.h>
 #include <linux/io.h>
 
 #include <asm/system.h>

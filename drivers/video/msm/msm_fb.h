@@ -22,6 +22,7 @@
 #include <linux/interrupt.h>
 #include "linux/proc_fs.h"
 
+#include <mach/hardware.h>
 #include <linux/io.h>
 #include <mach/board.h>
 
@@ -49,6 +50,12 @@
 #define MSM_FB_DEFAULT_PAGE_SIZE 2
 #define MFD_KEY  0x11161126
 #define MSM_FB_MAX_DEV_LIST 32
+
+#define MSM_FB_BL_SCALE_MAX 1024
+#define MSM_FB_BL_LEVEL_MAX 255
+#define MSM_FB_HISTOGRAM_FRAME_COUNT_MAX 0x20
+#define MSM_FB_HISTOGRAM_BIT_MASK_MAX 0x4
+#define MSM_FB_HISTOGRAM_BIN_NUM 128
 
 struct disp_info_type_suspend {
 	boolean op_enable;
@@ -153,7 +160,6 @@ struct msm_fb_data_type {
 	__u32 bl_level;
 
 	struct platform_device *pdev;
-	struct platform_device *panel_pdev;
 
 	__u32 var_xres;
 	__u32 var_yres;
@@ -246,9 +252,16 @@ int calc_fb_offset(struct msm_fb_data_type *mfd, struct fb_info *fbi, int bpp);
 void msm_fb_wait_for_fence(struct msm_fb_data_type *mfd);
 int msm_fb_signal_timeline(struct msm_fb_data_type *mfd);
 void msm_fb_release_timeline(struct msm_fb_data_type *mfd);
+#ifdef CONFIG_FB_BACKLIGHT
+void msm_fb_config_backlight(struct msm_fb_data_type *mfd);
+#endif
 
 void fill_black_screen(bool on, uint8 pipe_num, uint8 mixer_num);
 int msm_fb_check_frame_rate(struct msm_fb_data_type *mfd,
 				struct fb_info *info);
+
+#ifdef CONFIG_FB_MSM_LOGO
+int load_565rle_image(char *filename, bool bf_supported);
+#endif
 
 #endif /* MSM_FB_H */

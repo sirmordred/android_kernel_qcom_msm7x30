@@ -23,6 +23,7 @@
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/delay.h>
+#include <mach/hardware.h>
 #include <asm/io.h>
 
 #include <asm/system.h>

@@ -25,6 +25,7 @@
 #include "msm_fb.h"
 #include "hdmi_msm.h"
 #include "external_common.h"
+#include "mhl_api.h"
 
 #include "mdp.h"
 
@@ -1362,7 +1363,7 @@ static uint32 hdmi_edid_extract_ieee_reg_id(const uint8 *in_buf)
 	const uint8 *vsd = hdmi_edid_find_block(in_buf, DBC_START_OFFSET, 3,
 			&len);
 
-	if (vsd == NULL)
+	if (vsd == NULL || len < 8)
 		return 0;
 
 	DEV_DBG("EDID: VSD PhyAddr=%04x, MaxTMDS=%dMHz\n",

@@ -18,6 +18,8 @@
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/hrtimer.h>
+
+#include <mach/hardware.h>
 #include <linux/io.h>
 
 #include <asm/system.h>
@@ -59,7 +61,8 @@ static void mdp_dma_s_update_lcd(struct msm_fb_data_type *mfd)
 		return;
 	}
 
-	if (mfd->panel_info.type == MDDI_PANEL) {
+	if (mfd->panel_info.type == MDDI_PANEL ||
+		mfd->panel_info.type == EXT_MDDI_PANEL) {
 		dma_s_cfg_reg |= DMA_OUT_SEL_MDDI;
 		mddi_dest = TRUE;
 	} else {

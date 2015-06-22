@@ -22,19 +22,14 @@
 #include <linux/syscalls.h>
 
 #include <linux/irq.h>
+#include <asm/cacheflush.h>
 #include <asm/system.h>
 
-#include "mdp.h"
-#include "mdp4.h"
-
 #define fb_width(fb)	((fb)->var.xres)
-#define fb_linewidth(fb) \
-	((fb)->fix.line_length / (fb_depth(fb) == 2 ? 2 : 4))
 #define fb_height(fb)	((fb)->var.yres)
-#define fb_depth(fb)	((fb)->var.bits_per_pixel >> 3)
-#define fb_size(fb)	(fb_width(fb) * fb_height(fb) * fb_depth(fb))
-#define INIT_IMAGE_FILE "/initlogo.rle"
+#define fb_size(fb)	((fb)->var.xres * (fb)->var.yres * 2)
 
+#if 0
 static void memset16(void *_ptr, unsigned short val, unsigned count)
 {
 	unsigned short *ptr = _ptr;
@@ -42,28 +37,65 @@ static void memset16(void *_ptr, unsigned short val, unsigned count)
 	while (count--)
 		*ptr++ = val;
 }
+#endif
 
-static void memset32(void *_ptr, unsigned int val, unsigned count)
+/* convert RGB565 to RBG8888 */
+static int total_pixel = 1;
+static int memset16_rgb8888(void *_ptr, unsigned short val, unsigned count,
+				struct fb_info *fb)
 {
-	unsigned int *ptr = _ptr;
-	count >>= 2;
-	while (count--)
-		*ptr++ = val;
+	unsigned short *ptr = _ptr;
+	unsigned short red;
+	unsigned short green;
+	unsigned short blue;
+	int need_align = (fb->fix.line_length >> 2) - fb->var.xres;
+	int align_amount = need_align << 1;
+	int pad = 0;
+
+	red = (val & 0xF800) >> 8;
+	green = (val & 0x7E0) >> 3;
+	blue = (val & 0x1F) << 3;
+
+	count >>= 1;
+	while (count--) {
+		*ptr++ = (green << 8) | red;
+		*ptr++ = blue;
+
+		if (need_align) {
+			if (!(total_pixel % fb->var.xres)) {
+				ptr += align_amount;
+				pad++;
+			}
+		}
+
+		total_pixel++;
+	}
+
+	return pad * align_amount;
 }
 
 /* 565RLE image format: [count(2 bytes), rle(2 bytes)] */
 int load_565rle_image(char *filename, bool bf_supported)
 {
 	struct fb_info *info;
-	int fd, err = 0;
-	unsigned count, max, width, stride, line_pos = 0;
-	unsigned short *data, *ptr;
-	unsigned char *bits;
+	int fd, count, err = 0;
+	unsigned max;
+	unsigned short *data, *bits, *ptr;
+	struct module *owner;
+	int pad;
 
 	info = registered_fb[0];
 	if (!info) {
 		printk(KERN_WARNING "%s: Can not access framebuffer\n",
 			__func__);
+		return -ENODEV;
+	}
+
+	owner = info->fbops->owner;
+	if (!try_module_get(owner))
+		return -ENODEV;
+	if (info->fbops->fb_open && info->fbops->fb_open(info, 0)) {
+		module_put(owner);
 		return -ENODEV;
 	}
 
@@ -89,86 +121,37 @@ int load_565rle_image(char *filename, bool bf_supported)
 		err = -EIO;
 		goto err_logo_free_data;
 	}
-	width = fb_width(info);
-	stride = fb_linewidth(info);
-	max = width * fb_height(info);
+
+	max = fb_width(info) * fb_height(info);
 	ptr = data;
 	if (bf_supported && (info->node == 1 || info->node == 2)) {
 		err = -EPERM;
-		pr_err("%s:%d no info->screen_base on fb%d!\n",
+		pr_err("%s:%d no info->creen_base on fb%d!\n",
 		       __func__, __LINE__, info->node);
 		goto err_logo_free_data;
 	}
-	bits = (unsigned char *)(info->screen_base);
-	while (count > 3) {
-		int n = ptr[0];
-
-		if (n > max)
-			break;
-		max -= n;
-		while (n > 0) {
-			unsigned int j =
-				(line_pos + n > width ? width-line_pos : n);
-
-			if (fb_depth(info) == 2)
-				memset16(bits, swab16(ptr[1]), j << 1);
-			else {
-				unsigned int widepixel = ptr[1];
-				/*
-				 * Format is RGBA, but fb is big
-				 * endian so we should make widepixel
-				 * as ABGR.
-				 */
-				widepixel =
-					/* red :   f800 -> 000000f8 */
-					(widepixel & 0xf800) >> 8 |
-					/* green : 07e0 -> 0000fc00 */
-					(widepixel & 0x07e0) << 5 |
-					/* blue :  001f -> 00f80000 */
-					(widepixel & 0x001f) << 19;
-				memset32(bits, widepixel, j << 2);
-			}
-			bits += j * fb_depth(info);
-			line_pos += j;
-			n -= j;
-			if (line_pos == width) {
-				bits += (stride-width) * fb_depth(info);
-				line_pos = 0;
-			}
+	if (info->screen_base) {
+		bits = (unsigned short *)(info->screen_base);
+		while (count > 3) {
+			unsigned n = ptr[0];
+			if (n > max)
+				break;
+			pad = memset16_rgb8888(bits, ptr[1], n << 1, info);
+			bits += n << 1;
+			bits += pad;
+			max -= n;
+			ptr += 2;
+			count -= 4;
 		}
-		ptr += 2;
-		count -= 4;
 	}
+
+	flush_cache_all();
+	outer_flush_all();
 
 err_logo_free_data:
 	kfree(data);
 err_logo_close_file:
 	sys_close(fd);
-
 	return err;
 }
-
-static void draw_logo(void)
-{
-	struct fb_info *fb_info;
-
-	fb_info = registered_fb[0];
-	if (fb_info && fb_info->fbops->fb_open) {
-		printk(KERN_INFO "Drawing logo.\n");
-		fb_info->fbops->fb_open(fb_info, 0);
-		fb_info->fbops->fb_pan_display(&fb_info->var, fb_info);
-	}
-}
-
-static int __init logo_init(void)
-{
-	boolean bf_supported;
-	bf_supported = mdp4_overlay_borderfill_supported();
-
-	if (!load_565rle_image(INIT_IMAGE_FILE, bf_supported))
-		draw_logo();
-
-	return 0;
-}
-
-device_initcall_sync(logo_init);
+EXPORT_SYMBOL(load_565rle_image);

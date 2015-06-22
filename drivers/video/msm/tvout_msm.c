@@ -368,6 +368,9 @@ static int tvout_on(struct platform_device *pdev)
 #ifdef CONFIG_FB_MSM_TVOUT_SVIDEO
 	reg |= TVENC_CTL_S_VIDEO_EN;
 #endif
+#if defined(CONFIG_FB_MSM_MDP31)
+	TV_OUT(TV_DAC_INTF, 0x29);
+#endif
 	TV_OUT(TV_ENC_CTL, reg);
 
 	if (!tvout_msm_state->hpd_initialized) {
@@ -406,7 +409,7 @@ static int tvout_off(struct platform_device *pdev)
 	return 0;
 }
 
-static int tvout_probe(struct platform_device *pdev)
+static int __devinit tvout_probe(struct platform_device *pdev)
 {
 	int rc = 0;
 	uint32 reg;
@@ -501,7 +504,7 @@ error:
 	return 0;
 }
 
-static int tvout_remove(struct platform_device *pdev)
+static int __devexit tvout_remove(struct platform_device *pdev)
 {
 	external_common_state_remove();
 	kfree(tvout_msm_state);

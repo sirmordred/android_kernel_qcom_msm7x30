@@ -18,6 +18,8 @@
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/hrtimer.h>
+
+#include <mach/hardware.h>
 #include <asm/io.h>
 
 #include <asm/system.h>

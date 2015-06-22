@@ -75,9 +75,9 @@ boolean mddi_debug_clear_rev_data = TRUE;
 uint32 *mddi_reg_read_value_ptr;
 
 mddi_client_capability_type mddi_client_capability_pkt;
+static boolean mddi_client_capability_request = FALSE;
 
 #ifndef FEATURE_MDDI_DISABLE_REVERSE
-static boolean mddi_client_capability_request = FALSE;
 
 #define MAX_MDDI_REV_HANDLERS 2
 #define INVALID_PKT_TYPE 0xFFFF
@@ -839,7 +839,7 @@ static void mddi_process_rev_packets(void)
 	mddi_host_reg_out(REV_PKT_CNT, 0x0000);
 #endif
 
-#if defined(CONFIG_FB_MSM_MDP40)
+#if defined(CONFIG_FB_MSM_MDP31) || defined(CONFIG_FB_MSM_MDP40)
 	if ((pmhctl->rev_state == MDDI_REV_CLIENT_CAP_ISSUED) &&
 	    (rev_packet_count > 0) &&
 	    (mddi_host_core_version == 0x28 ||
@@ -1112,7 +1112,7 @@ static void mddi_process_rev_packets(void)
 			}
 		}
 	} else if (pmhctl->rev_state == MDDI_REV_CLIENT_CAP_ISSUED) {
-#if defined(CONFIG_FB_MSM_MDP40)
+#if defined(CONFIG_FB_MSM_MDP31) || defined(CONFIG_FB_MSM_MDP40)
 		if (mddi_host_core_version == 0x28 ||
 		    mddi_host_core_version == 0x30) {
 			mddi_host_reg_out(FIFO_ALLOC, 0x00);
@@ -1241,7 +1241,7 @@ static void mddi_issue_reverse_encapsulation(void)
 			if (!pmhctl->rev_ptr_written) {
 				MDDI_MSG_DEBUG("writing reverse pointer!\n");
 				pmhctl->rev_ptr_written = TRUE;
-#if defined(CONFIG_FB_MSM_MDP40)
+#if defined(CONFIG_FB_MSM_MDP31) || defined(CONFIG_FB_MSM_MDP40)
 				if ((pmhctl->rev_state ==
 				     MDDI_REV_CLIENT_CAP_ISSUED) &&
 				    (mddi_host_core_version == 0x28 ||
@@ -1468,19 +1468,11 @@ static void mddi_host_initialize_registers(mddi_host_type host_idx)
 	/* Turn Around 2 register (= 0x0C) */
 	mddi_host_reg_out(TA2_LEN, MDDI_HOST_TA2_LEN);
 
-#ifdef CONFIG_FB_MSM_MDDI_NOVATEK_FWVGA
-	/* Drive hi register (= 0x1FE) */
-	mddi_host_reg_out(DRIVE_HI, 0x01FE);
-
-	/* Drive lo register (= 0x50) */
-	mddi_host_reg_out(DRIVE_LO, 0x0050);
-#else
 	/* Drive hi register (= 0x96) */
 	mddi_host_reg_out(DRIVE_HI, 0x0096);
 
 	/* Drive lo register (= 0x32) */
 	mddi_host_reg_out(DRIVE_LO, 0x0032);
-#endif
 
 	/* Display wakeup count register (= 0x3c) */
 	mddi_host_reg_out(DISP_WAKE, 0x003c);
@@ -1517,7 +1509,7 @@ static void mddi_host_initialize_registers(mddi_host_type host_idx)
 
 	pad_reg_val = 0x00220020;
 
-#if defined(CONFIG_FB_MSM_MDP40)
+#if defined(CONFIG_FB_MSM_MDP31) || defined(CONFIG_FB_MSM_MDP40)
 	mddi_host_reg_out(PAD_IO_CTL, 0x00320000);
 	mddi_host_reg_out(PAD_CAL, pad_reg_val);
 #endif

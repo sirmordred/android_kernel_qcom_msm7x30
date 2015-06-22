@@ -25,6 +25,7 @@
 #include <linux/uaccess.h>
 #include <asm/system.h>
 #include <asm/mach-types.h>
+#include <mach/hardware.h>
 
 #include "mdp.h"
 #include "msm_fb.h"
@@ -339,7 +340,39 @@ static ssize_t mdp_stat_read(
 					mdp4_stat.intr_rdptr);
 	bp += len;
 	dlen -= len;
+	len = snprintf(bp, dlen, "dsi:\n");
+	bp += len;
+	dlen -= len;
+	len = snprintf(bp, dlen, "int_total: %08lu\tmdp_start: %08lu\n",
+			mdp4_stat.intr_dsi, mdp4_stat.dsi_mdp_start);
+	bp += len;
+	dlen -= len;
+	len = snprintf(bp, dlen, "int_cmd: %08lu\t",
+					mdp4_stat.intr_dsi_cmd);
 
+	bp += len;
+	dlen -= len;
+	len = snprintf(bp, dlen, "int_mdp: %08lu\t",
+					mdp4_stat.intr_dsi_mdp);
+
+	bp += len;
+	dlen -= len;
+
+	len = snprintf(bp, dlen, "int_err: %08lu\n",
+					mdp4_stat.intr_dsi_err);
+
+	bp += len;
+	dlen -= len;
+	len = snprintf(bp, dlen, "clk_on : %08lu\t",
+					mdp4_stat.dsi_clk_on);
+
+	bp += len;
+	dlen -= len;
+	len = snprintf(bp, dlen, "clk_off: %08lu\n\n",
+					mdp4_stat.dsi_clk_off);
+
+	bp += len;
+	dlen -= len;
 	len = snprintf(bp, dlen, "kickoff:\n");
 	bp += len;
 	dlen -= len;
@@ -475,6 +508,16 @@ static ssize_t mdp_stat_read(
 	dlen -= len;
 
 	len = snprintf(bp, dlen, "writeback:\n");
+	bp += len;
+	dlen -= len;
+
+	len = snprintf(bp, dlen, "dsi_cmd: %08lu\t",
+					mdp4_stat.blt_dsi_cmd);
+	bp += len;
+	dlen -= len;
+
+	len = snprintf(bp, dlen, "dsi_video: %08lu\n",
+					mdp4_stat.blt_dsi_video);
 	bp += len;
 	dlen -= len;
 
@@ -618,7 +661,7 @@ static int mddi_reg_read(int ndx)
 
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_ON, FALSE);
 	while (reg->name) {
-		data = readl(IOMEM((u32)base + reg->off));
+		data = readl((u32)base + reg->off);
 		len = snprintf(bp, dlen, "%s:0x%08x\t\t= 0x%08x\n",
 					reg->name, reg->off, data);
 		tot += len;
@@ -687,6 +730,84 @@ static const struct file_operations pmdh_fops = {
 	.read = pmdh_reg_read,
 	.write = pmdh_reg_write,
 };
+
+
+
+#if defined(CONFIG_FB_MSM_OVERLAY) && defined(CONFIG_FB_MSM_MDDI)
+static int vsync_reg_open(struct inode *inode, struct file *file)
+{
+	/* non-seekable */
+	file->f_mode &= ~(FMODE_LSEEK | FMODE_PREAD | FMODE_PWRITE);
+	return 0;
+}
+
+static int vsync_reg_release(struct inode *inode, struct file *file)
+{
+	return 0;
+}
+
+static ssize_t vsync_reg_write(
+	struct file *file,
+	const char __user *buff,
+	size_t count,
+	loff_t *ppos)
+{
+	uint32 enable;
+	int cnt;
+
+	if (count >= sizeof(debug_buf))
+		return -EFAULT;
+
+	if (copy_from_user(debug_buf, buff, count))
+		return -EFAULT;
+
+	debug_buf[count] = 0;	/* end of string */
+
+	cnt = sscanf(debug_buf, "%x", &enable);
+
+	mdp_dmap_vsync_set(enable);
+
+	return count;
+}
+
+static ssize_t vsync_reg_read(
+	struct file *file,
+	char __user *buff,
+	size_t count,
+	loff_t *ppos)
+{
+	char *bp;
+	int len = 0;
+	int tot = 0;
+	int dlen;
+
+	if (*ppos)
+		return 0;	/* the end */
+
+	bp = debug_buf;
+	dlen = sizeof(debug_buf);
+	len = snprintf(bp, dlen, "%x\n", mdp_dmap_vsync_get());
+	tot += len;
+	bp += len;
+	*bp = 0;
+	tot++;
+
+	if (copy_to_user(buff, debug_buf, tot))
+		return -EFAULT;
+
+	*ppos += tot;	/* increase offset */
+
+	return tot;
+}
+
+
+static const struct file_operations vsync_fops = {
+	.open = vsync_reg_open,
+	.release = vsync_reg_release,
+	.read = vsync_reg_read,
+	.write = vsync_reg_write,
+};
+#endif
 
 static ssize_t emdh_reg_write(
 	struct file *file,
@@ -796,9 +917,20 @@ static ssize_t dbg_base_read(
 				(int)msm_pmdh_base);
 	bp += len;
 	dlen -= len;
+	len = snprintf(bp, dlen, "emdh_base :    %08x\n",
+				(int)msm_emdh_base);
+	bp += len;
+	dlen -= len;
 #ifdef CONFIG_FB_MSM_TVOUT
-	len = snprintf(bp, dlen, "tvenc_base:    %08x\n",
+	len = snprintf(bp, dlen, "tvenv_base:    %08x\n",
 				(int)tvenc_base);
+	bp += len;
+	dlen -= len;
+#endif
+
+#ifdef CONFIG_FB_MSM_MIPI_DSI
+	len = snprintf(bp, dlen, "mipi_dsi_base: %08x\n",
+				(int)mipi_dsi_base);
 	bp += len;
 	dlen -= len;
 #endif
@@ -950,7 +1082,7 @@ static ssize_t dbg_reg_read(
 		off = 0;
 		i = 0;
 		while (i++ < 4) {
-			data = readl(IOMEM(cp + off));
+			data = readl(cp + off);
 			len = snprintf(bp, dlen, "%08x ", data);
 			tot += len;
 			bp += len;
@@ -960,7 +1092,7 @@ static ssize_t dbg_reg_read(
 			if (num >= dbg_count)
 				break;
 		}
-		data = readl(IOMEM((u32)cp + off));
+		data = readl((u32)cp + off);
 		*bp++ = '\n';
 		--dlen;
 		tot++;
@@ -1221,6 +1353,15 @@ int mdp_debugfs_init(void)
 			__FILE__, __LINE__);
 		return -1;
 	}
+
+#if defined(CONFIG_FB_MSM_OVERLAY) && defined(CONFIG_FB_MSM_MDDI)
+	if (debugfs_create_file("vsync", 0644, dent, 0, &vsync_fops)
+			== NULL) {
+		printk(KERN_ERR "%s(%d): debugfs_create_file: debug fail\n",
+			__FILE__, __LINE__);
+		return -1;
+	}
+#endif
 
 	dent = debugfs_create_dir("emdh", NULL);
 

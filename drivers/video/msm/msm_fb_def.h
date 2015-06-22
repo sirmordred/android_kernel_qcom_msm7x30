@@ -48,6 +48,8 @@
 #include <asm/system.h>
 #include <asm/mach-types.h>
 
+#include <mach/hardware.h>
+
 
 typedef s64 int64;
 typedef s32 int32;
@@ -114,10 +116,10 @@ typedef unsigned int boolean;
 #define inp8(addr) readb(addr)
 #define inp(addr) inp32(addr)
 
-#define inpw(port)             readw(IOMEM(port))
-#define outpw(port, val)       writew(val, IOMEM(port))
-#define inpdw(port)            readl(IOMEM(port))
-#define outpdw(port, val)      writel(val, IOMEM(port))
+#define inpw(port)             readw(port)
+#define outpw(port, val)       writew(val, port)
+#define inpdw(port)            readl(port)
+#define outpdw(port, val)      writel(val, port)
 
 
 #define clk_busy_wait(x) msleep_interruptible((x)/1000)
@@ -188,10 +190,12 @@ extern u32 msm_fb_msg_level;
 unsigned char *msm_mdp_base;
 unsigned char *msm_pmdh_base;
 unsigned char *msm_emdh_base;
+unsigned char *mipi_dsi_base;
 #else
 extern unsigned char *msm_mdp_base;
 extern unsigned char *msm_pmdh_base;
 extern unsigned char *msm_emdh_base;
+extern unsigned char *mipi_dsi_base;
 #endif
 
 #undef ENABLE_MDDI_MULTI_READ_WRITE

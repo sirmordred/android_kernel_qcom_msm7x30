@@ -24,6 +24,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/clk.h>
 
+#include <mach/hardware.h>
 #include <linux/io.h>
 
 #include <asm/system.h>
@@ -32,10 +33,6 @@
 #include <linux/dma-mapping.h>
 
 #include "msm_fb_panel.h"
-
-#ifdef CONFIG_FB_MSM_MDDI_DISABLE_REVERSE
-#define FEATURE_MDDI_DISABLE_REVERSE
-#endif
 
 #undef FEATURE_MDDI_MC4
 #undef FEATURE_MDDI_S6D0142
@@ -170,27 +167,6 @@ void mddi_queue_image
      int16 src_starting_column,
      int16 num_of_rows,
      int16 num_of_columns, int16 dst_starting_row, int16 dst_starting_column);
-
-#ifdef CONFIG_MACH_SEMC
-void mddi_host_register_write_xl(
-	uint32 reg_addr,
-	uint32 *reg_val_ext,
-	uint32 reg_nbrs,
-	boolean wait,
-	mddi_llist_done_cb_type done_cb,
-	mddi_host_type host);
-
-void mddi_host_register_write16(
-	uint32 reg_addr,
-	uint32 reg_val0,
-	uint32 reg_val1,
-	uint32 reg_val2,
-	uint32 reg_val3,
-	uint32 reg_nbrs,
-	boolean wait,
-	mddi_llist_done_cb_type done_cb,
-	mddi_host_type host);
-#endif
 
 int mddi_host_register_read
     (uint32 reg_addr,
