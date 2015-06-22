@@ -84,6 +84,7 @@ obj-$(CONFIG_FB_MSM_MDDI_NT35582_WVGA) += mddi_nt35582_wvga.o
 endif
 
 obj-$(CONFIG_FB_MSM_LCDC_PANEL) += lcdc_panel.o
+obj-$(CONFIG_FB_MSM_LCDC_SAMSUNG_ANCORA) += lcdc_samsung_ancora.o
 obj-$(CONFIG_FB_MSM_HDMI_ADV7520_PANEL) += adv7520.o
 obj-$(CONFIG_FB_MSM_HDMI_MSM_PANEL) += hdmi_msm.o
 obj-$(CONFIG_FB_MSM_EXT_INTERFACE_COMMON) += external_common.o

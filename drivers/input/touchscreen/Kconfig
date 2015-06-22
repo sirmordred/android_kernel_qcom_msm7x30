@@ -968,4 +968,5 @@ config TOUCHSCREEN_CYTTSP_CHARGER_MODE
 	help
 	  Activated for Cypress TTSP touch charger mode
 
+source "drivers/input/touchscreen/ancora/Kconfig"
 endif

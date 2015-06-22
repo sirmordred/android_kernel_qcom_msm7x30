@@ -170,4 +170,10 @@ source "drivers/reset/Kconfig"
 
 source "drivers/android/Kconfig"
 
+source "drivers/dpram/Kconfig"
+
+if MACH_ANCORA
+source "drivers/sensors_ancora/Kconfig"
+endif
+
 endmenu

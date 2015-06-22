@@ -49,7 +49,6 @@ obj-$(CONFIG_PCH_PHUB)		+= pch_phub.o
 obj-y				+= ti-st/
 obj-y				+= lis3lv02d/
 obj-y				+= carma/
-obj-$(CONFIG_USB_SWITCH_FSA9480) += fsa9480.o
 obj-$(CONFIG_ALTERA_STAPL)	+=altera-stapl/
 obj-$(CONFIG_INTEL_MEI)		+= mei/
 obj-$(CONFIG_VMWARE_VMCI)	+= vmw_vmci/
@@ -67,6 +66,8 @@ obj-$(CONFIG_ANDROID_PMEM)	+= pmem.o
 endif
 obj-$(CONFIG_MSM_MEMORY_LOW_POWER_MODE_SUSPEND_DEEP_POWER_DOWN) \
 	+= msm_migrate_pages.o
-obj-$(CONFIG_SENSORS_AK8975)	+= akm8975.o
 obj-$(CONFIG_LM3560)		+= lm356x.o
 obj-$(CONFIG_LM3561)		+= lm356x.o
+obj-$(CONFIG_SAMSUNG_JACK) += sec_jack.o
+obj-$(CONFIG_SAMSUNG_VIBRATOR) += samsung_vibrator.o
+obj-$(CONFIG_SAMSUNG_FM_SI4709) += fm_si4709/
