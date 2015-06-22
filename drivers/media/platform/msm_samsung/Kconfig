@@ -1,0 +1,87 @@
+config MSM_CAMERA_V4L2
+        bool "MSM Camera V4L2 Interface"
+        depends on MSM_CAMERA
+        default n
+        ---help---
+          This flag enables V4L2 interface of MSM
+          camera driver. If enabled, application interacts
+          with /dev/video0 through V4L2 APIs. Otherwise,
+          native APIs are used through /dev/config0, /dev/frame0,
+          and /dev/control0.
+
+comment "Camera Sensor Selection"
+
+config OEM_CAMERA
+	bool "use oem camera feature"
+	default y
+
+config USE_QUP_I2C
+	bool "use qup i2c feature"
+	default y
+
+config SENSOR_CE147
+	bool "NEC ISP (BAYER 5M)"
+	default n
+
+config SENSOR_S5K4ECGX
+	bool "LSI (BAYER 5M)"
+	default n
+
+config SENSOR_S5KA3DFX
+	bool "LSI CIS (VGA)"
+	default n  
+
+config SENSOR_S5K5CCAF
+	bool "Sensor s5k5cc 1/5 (3M/AF)"
+	default n
+	---help---
+	  SAMSUNG 3M CMOS Sensor
+
+config S5K3E2FX
+	bool "Sensor s5k3e2fx (Samsung 5M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60 && !MSM_CAMERA_V4L2
+	default y
+	---help---
+	  Samsung 5M with Autofocus
+
+config MSM_CAMERA_FLASH
+	bool "Qualcomm MSM camera flash support"
+	depends on MSM_CAMERA
+	default y
+	---help---
+	  Enable support for LED flash for msm camera
+
+config MSM_GEMINI
+	tristate "Qualcomm MSM Gemini Jpeg Engine support"
+	depends on MSM_CAMERA && (ARCH_MSM7X30 || ARCH_MSM8X60)
+	default M
+	---help---
+	  Enable support for Gemini Jpeg Engine
+
+config MSM_VPE
+	tristate "Qualcomm MSM Video Pre-processing Engine support"
+	depends on MSM_CAMERA && (ARCH_MSM7X30 || ARCH_MSM8X60)
+	default y
+	---help---
+	  Enable support for Video Pre-processing Engine
+
+config QUP_EXCLUSIVE_TO_CAMERA
+	bool "QUP exclusive to camera"
+	depends on MSM_CAMERA
+	default y
+	---help---
+	  This flag enabled states that QUP
+	  is exclusive to camera. In case this
+	  is disabled, the lvs1 voltage is enabled
+	  by QUP in the board file as QUP is used by
+	  applications other than camera.
+config SENSOR_SR030PC30
+	bool "use VGS camera feature"
+	default n
+
+config SENSOR_SR030PC30_T679
+	bool "use T679 VGS camera feature"
+	default n	
+config SENSOR_SR130PC10
+	bool "use SGH-I847[Apache ATT] VGA camera feature"
+	default n

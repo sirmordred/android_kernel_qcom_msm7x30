@@ -18,6 +18,10 @@
 
 #include <media/msm_camera_semc.h>
 
+#elif defined(CONFIG_MSM_CAMERA_SAMSUNG)
+
+#include <media/msm_camera_samsung.h>
+
 #else
 
 #ifndef __LINUX_MSM_CAMERA_H

@@ -158,6 +158,18 @@ if MSM_CAMERA_HUAWEI
 source "drivers/media/platform/msm_huawei/Kconfig"
 endif
 
+config MSM_CAMERA_SAMSUNG
+	bool "Qualcomm MSM camera and video capture support for Samsung"
+	depends on MSM_CAMERA && MACH_ANCORA
+	default y
+	help
+	  Say Y here to enable selecting the video adapters for
+	  Qualcomm msm camera and video encoding for Samsung
+
+if MSM_CAMERA_SAMSUNG
+source "drivers/media/platform/msm_samsung/Kconfig"
+endif
+
 config MSM_CAMERA_SEMC
 	bool "Qualcomm MSM camera and video capture support for SEMC"
 	depends on MSM_CAMERA && MACH_SEMC
