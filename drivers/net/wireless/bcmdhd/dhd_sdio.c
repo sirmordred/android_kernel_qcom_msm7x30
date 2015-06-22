@@ -694,14 +694,14 @@ dhdsdio_sr_cap(dhd_bus_t *bus)
 			data = SI_ENUM_BASE + OFFSETOF(chipcregs_t, chipcontrol_data);
 			bcmsdh_reg_write(bus->sdh, addr, 4, 3);
 			core_capext = bcmsdh_reg_read(bus->sdh, data, 4);
-	} else if (bus->sih->chip == BCM4329_CHIP_ID) {
-			core_capext = FALSE;
 	} else if (bus->sih->chip == BCM4330_CHIP_ID) {
 			core_capext = FALSE;
 	} else if ((bus->sih->chip == BCM4335_CHIP_ID) ||
 		(bus->sih->chip == BCM4339_CHIP_ID) ||
 		(bus->sih->chip == BCM4350_CHIP_ID)) {
 		core_capext = TRUE;
+	} else if (bus->sih->chip == BCM4329_CHIP_ID) {
+			core_capext = FALSE;
 	} else {
 			core_capext = bcmsdh_reg_read(bus->sdh, CORE_CAPEXT_ADDR, 4);
 			core_capext = (core_capext & CORE_CAPEXT_SR_SUPPORTED_MASK);
@@ -1387,7 +1387,11 @@ dhdsdio_bussleep(dhd_bus_t *bus, bool sleep)
 	/* Going to sleep: set the alarm and turn off the lights... */
 	if (sleep) {
 		/* Don't sleep if something is pending */
+#ifdef CUSTOMER_HW4
+		if (bus->dpc_sched || bus->rxskip || pktq_len(&bus->txq) || bus->readframes)
+#else
 		if (bus->dpc_sched || bus->rxskip || pktq_len(&bus->txq))
+#endif /* CUSTOMER_HW4 */
 			return BCME_BUSY;
 
 
@@ -8052,9 +8056,7 @@ dhd_bus_devreset(dhd_pub_t *dhdp, uint8 flag)
 
 #if defined(OOB_INTR_ONLY)
 			/* Clean up any pending IRQ */
-			dhd_enable_oob_intr(bus, FALSE);
 			bcmsdh_set_irq(FALSE);
-			bcmsdh_unregister_oob_intr();
 #endif 
 
 			/* Clean tx/rx buffer pointers, detach from the dongle */

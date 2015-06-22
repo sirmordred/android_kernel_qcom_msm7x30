@@ -79,7 +79,11 @@
 
 static struct device *cfg80211_parent_dev = NULL;
 struct wl_priv *wlcfg_drv_priv = NULL;
+#ifdef CUSTOMER_HW4
+u32 wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION;
+#else
 u32 wl_dbg_level = WL_DBG_ERR;
+#endif
 
 #define MAX_WAIT_TIME 1500
 
@@ -340,9 +344,7 @@ static s32 wl_notify_escan_complete(struct wl_priv *wl,
 static s32 wl_cfg80211_tdls_oper(struct wiphy *wiphy, struct net_device *dev,
 	u8 *peer, enum nl80211_tdls_operation oper);
 #endif /* LINUX_VERSION_CODE > KERNEL_VERSION(3, 2, 0) */
-#ifdef WL_SCHED_SCAN
 static int wl_cfg80211_sched_scan_stop(struct wiphy *wiphy, struct net_device *dev);
-#endif /* WL_SCHED_SCAN */
 
 /*
  * event & event Q handlers for cfg80211 interfaces
@@ -1074,15 +1076,9 @@ static chanspec_t wl_cfg80211_get_shared_freq(struct wiphy *wiphy)
 	return chspec;
 }
 
-#if defined(WL_CFG80211_P2P_DEV_IF)
-static bcm_struct_cfgdev *
-wl_cfg80211_add_monitor_if(const char *name)
-{
-#else
 static bcm_struct_cfgdev *
 wl_cfg80211_add_monitor_if(char *name)
 {
-#endif /* WL_CFG80211_P2P_DEV_IF */
 #if defined(WL_ENABLE_P2P_IF) || defined(WL_CFG80211_P2P_DEV_IF)
 	WL_INFO(("wl_cfg80211_add_monitor_if: No more support monitor interface\n"));
 	return ERR_PTR(-EOPNOTSUPP);
@@ -1280,7 +1276,11 @@ wl_cfg80211_add_virtual_iface(struct wiphy *wiphy,
 				rollback_lock = true;
 			}
 			if (net_attach && !net_attach(wl->pub, _ndev->ifindex)) {
+#ifdef CUSTOMER_HW4
+				wl_alloc_netinfo(wl, _ndev, vwdev, mode, PM_BLOCK);
+#else
 				wl_alloc_netinfo(wl, _ndev, vwdev, mode, PM_ENABLE);
+#endif /* CUSTOMER_HW4 */
 				val = 1;
 				/* Disable firmware roaming for P2P interface  */
 				wldev_iovar_setint(_ndev, "roam_off", val);
@@ -2296,8 +2296,10 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 		/* we don't do iscan in ibss */
 		ssids = this_ssid;
 	}
-	if (request && (wl->p2p && !p2p_scan(wl)))
+#ifndef CUSTOMER_HW4
+	if (request && !p2p_scan(wl))
 		WL_TRACE_HW4(("START SCAN\n"));
+#endif
 	wl->scan_request = request;
 	wl_set_drv_status(wl, SCANNING, ndev);
 	if (iscan_req) {
@@ -9434,7 +9436,6 @@ s32 wl_cfg80211_attach_post(struct net_device *ndev)
 					wl->wdev->wiphy->interface_modes |=
 					(BIT(NL80211_IFTYPE_P2P_CLIENT)|
 					BIT(NL80211_IFTYPE_P2P_GO));
-
 				if ((err = wl_cfgp2p_init_priv(wl)) != 0)
 					goto fail;
 
