@@ -1,0 +1,12 @@
+config MACH_ANCORA
+	depends on ARCH_MSM7X30
+	select MACH_ANCORA
+	select APPSBOOT_3M_CONFIG
+	bool "ANCORA"
+	help
+	  Support for the Samsung Ancora board.
+
+config BOARD_REVISION
+	hex "Select H/W Revision"
+	depends on MACH_ANCORA
+	default "0x00"

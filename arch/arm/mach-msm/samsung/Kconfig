@@ -1,0 +1,6 @@
+config MACH_ANCORA
+	bool
+
+menu "Samsung Board Selection"
+source "arch/arm/mach-msm/samsung/Kconfig.board"
+endmenu

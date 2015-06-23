@@ -1,0 +1,3 @@
+obj-$(CONFIG_MACH_ANCORA) += board-ancora.o board-ancora-regulator.o
+obj-$(CONFIG_BCMDHD) += broadcom_wlan.o
+obj-$(CONFIG_MARIMBA_CODEC) += snddev_data_marimba.o

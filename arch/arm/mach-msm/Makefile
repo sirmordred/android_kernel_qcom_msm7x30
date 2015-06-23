@@ -59,7 +59,8 @@ obj-$(CONFIG_MSM_IDLE_STATS) += pm-stats.o
 obj-$(CONFIG_MSM_PM2) += pm2.o
 obj-$(CONFIG_MSM_SPM_V1) += spm.o
 obj-$(CONFIG_ARCH_MSM7X30) += acpuclock-7x30.o clock-7x30.o clock-local.o clock-pll.o
-obj-$(CONFIG_ARCH_MSM7X30) += gpiomux-v1.o gpiomux.o
+obj-$(CONFIG_ARCH_MSM7X30) += gpiomux-7x30.o gpiomux-v1.o gpiomux.o
+obj-$(CONFIG_ARCH_MSM7X30) += devices-msm7x30.o
 
 obj-$(CONFIG_MACH_HUAWEI) += huawei/
 obj-$(CONFIG_MACH_SEMC) += semc/
