@@ -80,10 +80,6 @@
 
 #include "devices.h"
 #include "timer.h"
-#ifdef CONFIG_USB_G_ANDROID
-#include <linux/usb/android.h>
-#include <mach/usbdiag.h>
-#endif
 #include "pm.h"
 #include "pm-boot.h"
 #include "spm.h"
@@ -3712,16 +3708,9 @@ static struct platform_device cam_pm_lp8720_i2c_device = {
 #endif
 
 #ifdef CONFIG_USB_G_ANDROID
-static struct android_usb_platform_data android_usb_pdata = {
-	.update_pid_and_serial_num = usb_diag_update_pid_and_serial_num,
-};
-
 static struct platform_device android_usb_device = {
 	.name	    = "android_usb",
 	.id         = -1,
-	.dev        = {
-		.platform_data = &android_usb_pdata,
-	},
 };
 #endif
 
