@@ -2683,6 +2683,20 @@ static DEVICE_ATTR(chg_type, S_IRUSR, show_usb_chg_type, 0);
 static DEVICE_ATTR(chg_current, S_IWUSR | S_IRUSR,
 		show_usb_chg_current, store_usb_chg_current);
 
+void usb_force_reset(void)
+{
+	struct usb_info *ui = the_usb_info;
+	unsigned long flags;
+
+	spin_lock_irqsave(&ui->lock, flags);
+	ui->flags |= USB_FLAG_RESET;
+	schedule_work(&ui->work);
+	spin_unlock_irqrestore(&ui->lock, flags);
+
+	return;
+}
+EXPORT_SYMBOL(usb_force_reset);
+
 static int msm72k_probe(struct platform_device *pdev)
 {
 	struct usb_info *ui;

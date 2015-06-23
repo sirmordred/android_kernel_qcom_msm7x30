@@ -101,21 +101,11 @@ int pll_vote_clk_is_enabled(struct clk *c)
 	return !!(readl_relaxed(PLL_STATUS_REG(pllv)) & pllv->status_mask);
 }
 
-static enum handoff pll_vote_clk_handoff(struct clk *c)
-{
-	struct pll_vote_clk *pllv = to_pll_vote_clk(c);
-	if (readl_relaxed(PLL_EN_REG(pllv)) & pllv->en_mask)
-		return HANDOFF_ENABLED_CLK;
-
-	return HANDOFF_DISABLED_CLK;
-}
-
 struct clk_ops clk_ops_pll_vote = {
 	.enable = pll_vote_clk_enable,
 	.disable = pll_vote_clk_disable,
 	.is_enabled = pll_vote_clk_is_enabled,
 	.get_parent = pll_vote_clk_get_parent,
-	.handoff = pll_vote_clk_handoff,
 };
 
 static void __pll_clk_enable_reg(void __iomem *mode_reg)
@@ -179,18 +169,6 @@ static void local_pll_clk_disable(struct clk *c)
 	spin_lock_irqsave(&pll_reg_lock, flags);
 	__pll_clk_disable_reg(PLL_MODE_REG(pll));
 	spin_unlock_irqrestore(&pll_reg_lock, flags);
-}
-
-static enum handoff local_pll_clk_handoff(struct clk *c)
-{
-	struct pll_clk *pll = to_pll_clk(c);
-	u32 mode = readl_relaxed(PLL_MODE_REG(pll));
-	u32 mask = PLL_BYPASSNL | PLL_RESET_N | PLL_OUTCTRL;
-
-	if ((mode & mask) == mask)
-		return HANDOFF_ENABLED_CLK;
-
-	return HANDOFF_DISABLED_CLK;
 }
 
 static struct clk *local_pll_clk_get_parent(struct clk *c)
@@ -280,7 +258,6 @@ out:
 struct clk_ops clk_ops_local_pll = {
 	.enable = local_pll_clk_enable,
 	.disable = local_pll_clk_disable,
-	.handoff = local_pll_clk_handoff,
 	.get_parent = local_pll_clk_get_parent,
 };
 
@@ -396,41 +373,9 @@ static int pll_clk_is_enabled(struct clk *c)
 	return readl_relaxed(PLL_MODE_REG(to_pll_shared_clk(c))) & BIT(0);
 }
 
-static enum handoff pll_clk_handoff(struct clk *c)
-{
-	struct pll_shared_clk *pll = to_pll_shared_clk(c);
-	unsigned int pll_lval;
-	struct pll_rate *l;
-
-	/*
-	 * Wait for the PLLs to be initialized and then read their frequency.
-	 */
-	do {
-		pll_lval = readl_relaxed(PLL_MODE_REG(pll) + 4) & 0x3ff;
-		cpu_relax();
-		udelay(50);
-	} while (pll_lval == 0);
-
-	/* Convert PLL L values to PLL Output rate */
-	for (l = pll_l_rate; l->rate != 0; l++) {
-		if (l->lvalue == pll_lval) {
-			c->rate = l->rate;
-			break;
-		}
-	}
-
-	if (!c->rate) {
-		pr_crit("Unknown PLL's L value!\n");
-		BUG();
-	}
-
-	return HANDOFF_ENABLED_CLK;
-}
-
 struct clk_ops clk_ops_pll = {
 	.enable = pll_clk_enable,
 	.disable = pll_clk_disable,
-	.handoff = pll_clk_handoff,
 	.is_enabled = pll_clk_is_enabled,
 };
 

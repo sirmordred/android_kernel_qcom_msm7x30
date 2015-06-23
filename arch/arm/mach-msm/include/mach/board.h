@@ -876,10 +876,26 @@ void msm_snddev_hac_amp_off(void);
 #endif
 void msm_snddev_poweramp_on(void);
 void msm_snddev_poweramp_off(void);
+void msm_snddev_poweramp_on_speaker(void);
+void msm_snddev_poweramp_on_speaker_call(void);
+void msm_snddev_poweramp_on_headset(void);
+void msm_snddev_poweramp_on_headset_call(void);
+void msm_snddev_poweramp_on_dock(void);
+void msm_snddev_poweramp_on_together(void);
+void msm_snddev_poweramp_on_tty(void);
+void msm_snddev_poweramp_off_speaker(void);
+void msm_snddev_poweramp_off_speaker_call(void);
+void msm_snddev_poweramp_off_headset(void);
+void msm_snddev_poweramp_off_headset_call(void);
+void msm_snddev_poweramp_off_dock(void);
+void msm_snddev_poweramp_off_together(void);
+void msm_snddev_poweramp_off_tty(void);
 void msm_snddev_hsed_voltage_on(void);
 void msm_snddev_hsed_voltage_off(void);
 void msm_snddev_tx_route_config(void);
 void msm_snddev_tx_route_deconfig(void);
+void msm_snddev_tx_ear_route_config(void);
+void msm_snddev_tx_ear_route_deconfig(void);
 
 extern unsigned int msm_shared_ram_phys; /* defined in arch/arm/mach-msm/io.c */
 

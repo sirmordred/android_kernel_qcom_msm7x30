@@ -40,6 +40,10 @@
 #include <linux/regulator/pm8058-xo.h>
 #include <linux/mfd/pm8xxx/pwm.h>
 
+#ifdef CONFIG_CHARGER_SMB328A
+#define PM8058_GPIO(n) ((n) - 1)
+#endif
+
 #define PM8058_GPIOS		40
 #define PM8058_MPPS		12
 

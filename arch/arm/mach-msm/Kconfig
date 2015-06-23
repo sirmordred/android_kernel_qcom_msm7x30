@@ -36,10 +36,11 @@ config MSM_REMOTE_SPINLOCK_DEKKERS
 
 source "arch/arm/mach-msm/huawei/Kconfig"
 source "arch/arm/mach-msm/semc/Kconfig"
+source "arch/arm/mach-msm/samsung/Kconfig"
 
 config PHYS_OFFSET
 	hex
-	default "0x00200000"
+	default "0x00400000"
 
 config MSM_AMSS_VERSION
 	int
