@@ -145,12 +145,12 @@ struct device *switch_dev;
 EXPORT_SYMBOL(switch_dev);
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-#define MSM_FB_PRIM_BUF_SIZE	(roundup((800 * 480 * 4), 4096) * 3) /* 4bpp * 3 Pages */
+#define MSM_FB_PRIM_BUF_SIZE	(800 * 480 * 4 * 3) /* 4bpp * 3 Pages */
 #else
-#define MSM_FB_PRIM_BUF_SIZE	(roundup((800 * 480 * 4), 4096) * 2) /* 4bpp * 2 Pages */
+#define MSM_FB_PRIM_BUF_SIZE	(800 * 480 * 4 * 2) /* 4bpp * 2 Pages */
 #endif
 
-#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE, 4096)
+#define MSM_FB_SIZE	MSM_FB_PRIM_BUF_SIZE
 
 #ifdef MSM_ION_MM_USE_CMA
 #define MSM_DMA_CONTIGUOUS_BASE			0x0
@@ -7299,7 +7299,7 @@ static struct platform_device ion_cma_heap_device = {
  * These heaps are listed in the order they will be allocated.
  * Don't swap the order unless you know what you are doing!
  */
-struct ion_platform_heap msm7x30_heaps[] = {
+static struct ion_platform_heap msm7x30_heaps[] = {
 		{
 			.id	= ION_SYSTEM_HEAP_ID,
 			.type	= ION_HEAP_TYPE_SYSTEM,
@@ -7311,6 +7311,7 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_CP_MM_HEAP_ID,
 			.type	= MSM_ION_MM_HEAP_TYPE,
 			.name	= ION_MM_HEAP_NAME,
+			.size	= MSM_ION_MM_SIZE,
 #ifdef CONFIG_MSM_ION_MM_USE_CMA
 			.priv	= (void *)&ion_cma_heap_device.dev,
 #endif
@@ -7320,6 +7321,7 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_AUDIO_HEAP_ID,
 			.type	= ION_HEAP_TYPE_DMA,
 			.name	= ION_AUDIO_HEAP_NAME,
+			.size	= MSM_ION_AUDIO_SIZE,
 			.priv	= (void *)&ion_cma_heap_device.dev,
 		},
 		/* PMEM_MDP = SF */
@@ -7327,6 +7329,7 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_SF_HEAP_ID,
 			.type	= ION_HEAP_TYPE_DMA,
 			.name	= ION_SF_HEAP_NAME,
+			.size	= MSM_ION_SF_SIZE,
 			.priv	= (void *)&ion_cma_heap_device.dev,
 		},
 #endif
@@ -7367,23 +7370,9 @@ static void __init reserve_pmem_memory(void)
 }
 */
 
-static void __init size_ion_devices(void)
-{
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
-	ion_pdata.heaps[1].size = MSM_ION_MM_SIZE;
-	ion_pdata.heaps[2].size = MSM_ION_AUDIO_SIZE;
-	ion_pdata.heaps[3].size = MSM_ION_SF_SIZE;
-
-	/* Workaround to fix deep sleep issues */
-	msm7x30_reserve_table[MEMTYPE_EBI0].size += 1;
-#endif
-}
 
 static void __init msm7x30_calculate_reserve_sizes(void)
 {
-	/*size_pmem_devices();
-	reserve_pmem_memory();*/
-	size_ion_devices();
 }
 
 static int msm7x30_paddr_to_memtype(unsigned int paddr)
