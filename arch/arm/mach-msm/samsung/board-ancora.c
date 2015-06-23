@@ -157,13 +157,15 @@ EXPORT_SYMBOL(switch_dev);
 
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE, 4096)
 
-#if defined(CONFIG_MSM_ION_MM_USE_CMA) || defined(CONFIG_MSM_PMEM_ADSP_USE_CMA)
+#ifdef MSM_ION_MM_USE_CMA
 #define MSM_DMA_CONTIGUOUS_BASE			0x0
 #define MSM_DMA_CONTIGUOUS_LIMIT		0x20000000
 static u64 msm_dmamask = DMA_BIT_MASK(32);
 #endif
 
+/* Temporary disabled
 #define MSM_PMEM_ADSP_SIZE		0x1A00000
+*/
 
 #ifdef CONFIG_ION_MSM
 static struct platform_device ion_dev;
@@ -4277,7 +4279,7 @@ static struct platform_device msm_migrate_pages_device = {
 	.id     = -1,
 };
 
-#ifdef CONFIG_ANDROID_PMEM
+/*
 #ifdef CONFIG_MSM_PMEM_ADSP_USE_CMA
 static struct platform_device pmem_adsp_heap_device = {
 	.name = "pmem-adsp-heap-device",
@@ -4288,6 +4290,7 @@ static struct platform_device pmem_adsp_heap_device = {
 	}
 };
 #endif
+*/
 
 static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 	.name = "pmem_adsp",
@@ -5428,9 +5431,9 @@ static struct platform_device *devices[] __initdata = {
 #ifdef CONFIG_FB_MSM_LCDC_SAMSUNG_ANCORA_PANEL
 	&lcdc_samsung_panel_device,
 #endif
-#ifdef CONFIG_ANDROID_PMEM
+/*
 	&android_pmem_adsp_device,
-#endif
+*/
 	&msm_device_i2c_2,
 	&msm_device_uart_dm1,
 	&hs_device,
@@ -7280,7 +7283,7 @@ static int __init fb_size_setup(char *p)
 }
 early_param("fb_size", fb_size_setup);
 
-#ifdef CONFIG_ANDROID_PMEM
+/*
 static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 static int __init pmem_adsp_size_setup(char *p)
 {
@@ -7288,7 +7291,7 @@ static int __init pmem_adsp_size_setup(char *p)
 	return 0;
 }
 early_param("pmem_adsp_size", pmem_adsp_size_setup);
-#endif
+*/
 
 #ifdef CONFIG_ION_MSM
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
@@ -7380,19 +7383,17 @@ static struct memtype_reserve msm7x30_reserve_table[] __initdata = {
 	},
 };
 
+/* Temporary disabled
 static void __init size_pmem_devices(void)
 {
-#ifdef CONFIG_ANDROID_PMEM
 	android_pmem_adsp_pdata.size = pmem_adsp_size;
-#endif
 }
 
 static void __init reserve_pmem_memory(void)
 {
-#if defined(CONFIG_ANDROID_PMEM) && !defined(CONFIG_MSM_PMEM_ADSP_USE_CMA)
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += android_pmem_adsp_pdata.size;
-#endif
 }
+*/
 
 static void __init size_ion_devices(void)
 {
@@ -7408,8 +7409,8 @@ static void __init size_ion_devices(void)
 
 static void __init msm7x30_calculate_reserve_sizes(void)
 {
-	size_pmem_devices();
-	reserve_pmem_memory();
+	/*size_pmem_devices();
+	reserve_pmem_memory();*/
 	size_ion_devices();
 }
 
@@ -7444,13 +7445,13 @@ static void __init msm7x30_reserve(void)
 			MSM_DMA_CONTIGUOUS_BASE,
 			MSM_DMA_CONTIGUOUS_LIMIT);
 #endif
-#ifdef CONFIG_MSM_PMEM_ADSP_USE_CMA
+/*
 	dma_declare_contiguous(
 			&pmem_adsp_heap_device.dev,
 			pmem_adsp_size,
 			MSM_DMA_CONTIGUOUS_BASE,
 			MSM_DMA_CONTIGUOUS_LIMIT);
-#endif
+*/
 #ifdef CONFIG_ANDROID_PERSISTENT_RAM
 	add_persistent_ram();
 #endif
