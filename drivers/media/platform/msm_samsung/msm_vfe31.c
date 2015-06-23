@@ -3181,7 +3181,7 @@ static int vfe31_init(struct msm_vfe_callback *presp,
 
 	/* TO DO: Need to release the VFE resources */
 	rc = request_irq(vfe31_ctrl->vfeirq, vfe31_parse_irq,
-			IRQF_TRIGGER_RISING, "vfe", 0);
+			IRQF_TRIGGER_RISING | IRQF_ONESHOT, "vfe", 0);
 
 	return rc;
 }

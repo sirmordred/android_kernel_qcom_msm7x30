@@ -893,7 +893,7 @@ static int samsung_probe(struct platform_device *pdev)
 #ifdef LCD_DET_ENABLE
 	if((board_lcd_hw_revision==3) || (board_lcd_hw_revision==1)) { //for HYDIS and SMD
 		irq_set_irq_type(LCD_DET_ENABLE_IRQ, IRQ_TYPE_EDGE_FALLING);
-		err = request_threaded_irq(LCD_DET_ENABLE_IRQ, NULL,s6d16a0x_esd_irq_handler, IRQF_TRIGGER_FALLING, "LCD_ESD_DET", (void*)pdev->dev.platform_data);
+		err = request_threaded_irq(LCD_DET_ENABLE_IRQ, NULL,s6d16a0x_esd_irq_handler, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, "LCD_ESD_DET", (void*)pdev->dev.platform_data);
 
 		if (err) {
 			pr_info ( "%s, request_irq failed ESD_DET, ret= %d\n", __func__, err);

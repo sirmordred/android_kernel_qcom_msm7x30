@@ -1095,7 +1095,7 @@ static int vpe_enable_irq(void)
 	uint32_t   rc = 0;
 	rc = request_irq(vpe_device->vpeirq,
 				vpe_parse_irq,
-				IRQF_TRIGGER_HIGH, "vpe", 0);
+				IRQF_TRIGGER_HIGH | IRQF_ONESHOT, "vpe", 0);
 	return rc;
 }
 

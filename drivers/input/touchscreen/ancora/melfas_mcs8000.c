@@ -2301,7 +2301,7 @@ int melfas_mcs8000_ts_probe(struct i2c_client *client,
 	printk("[Touch] irq : %d, irq : %d\n", melfas_mcs8000_ts->client->irq, client->irq);
 
 	irq_set_irq_type(melfas_mcs8000_ts->client->irq, IRQ_TYPE_EDGE_FALLING);
-	ret = request_irq(melfas_mcs8000_ts->client->irq, melfas_mcs8000_ts_irq_handler, IRQF_DISABLED  , melfas_mcs8000_ts->client->name, melfas_mcs8000_ts);
+	ret = request_irq(melfas_mcs8000_ts->client->irq, melfas_mcs8000_ts_irq_handler, IRQF_DISABLED | IRQF_ONESHOT, melfas_mcs8000_ts->client->name, melfas_mcs8000_ts);
 	if(ret == 0) {
 		printk(KERN_INFO "melfas_mcs8000_ts_probe: Start touchscreen %s \n", melfas_mcs8000_ts->input_dev->name);
 	} else {

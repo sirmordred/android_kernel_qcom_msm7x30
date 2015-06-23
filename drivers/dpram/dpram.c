@@ -1469,7 +1469,7 @@ static int register_interrupt_handler(void)
 	/* @LDK@ Phone active INT. */
 	
 	/* @LDK@ dpram interrupt */
-	retval = request_irq(INT_A9_M2A_4, dpram_interrupt, IRQF_TRIGGER_RISING, DRIVER_NAME, NULL);
+	retval = request_irq(INT_A9_M2A_4, dpram_interrupt, IRQF_TRIGGER_RISING | IRQF_ONESHOT, DRIVER_NAME, NULL);
 
 	if (retval) {
 		dprintk("DPRAM interrupt handler failed.\n");
@@ -1546,7 +1546,7 @@ void request_phone_power_off_reset(int flag)
 	}
 }
 
-static int __devinit dpram_probe(struct platform_device *dev)
+static int dpram_probe(struct platform_device *dev)
 {
 	int retval;
 
@@ -1593,7 +1593,7 @@ static int __devinit dpram_probe(struct platform_device *dev)
 	return 0;
 }
 
-static int __devexit dpram_remove(struct platform_device *dev)
+static int dpram_remove(struct platform_device *dev)
 {
 	/* @LDK@ unregister dpram (tty) driver */
 	unregister_dpram_driver();
@@ -1610,7 +1610,7 @@ static int __devexit dpram_remove(struct platform_device *dev)
 
 static struct platform_driver platform_dpram_driver = {
 	.probe = dpram_probe,
-	.remove = __devexit_p(dpram_remove),
+	.remove = dpram_remove,
 	.suspend = dpram_suspend,
 	.resume = dpram_resume,
 	.driver = {

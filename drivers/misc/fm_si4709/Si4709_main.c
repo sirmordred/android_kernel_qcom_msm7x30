@@ -790,7 +790,7 @@ if (gpio_tlmm_config(GPIO_CFG(GPIO_FM_INT, 0, GPIO_CFG_INPUT,
 	irq_set_irq_type(Si4709_irq, IRQ_TYPE_EDGE_FALLING);
 
 	/*KGVS: Configuring the GPIO_FM_INT in mach-jupiter.c */
-	ret = request_irq(Si4709_irq, Si4709_isr, IRQF_DISABLED,
+	ret = request_irq(Si4709_irq, Si4709_isr, IRQF_DISABLED | IRQF_ONESHOT,
 			  "Si4709", NULL);
 	if (ret) {
 		error("Si4709_driver_init request_irq "

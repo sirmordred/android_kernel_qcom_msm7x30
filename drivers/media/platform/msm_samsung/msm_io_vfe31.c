@@ -508,7 +508,7 @@ int msm_camio_enable(struct platform_device *pdev)
 			goto csi_busy;
 		}
 		rc = request_irq(camio_ext.csiirq, msm_io_csi_irq,
-			IRQF_TRIGGER_RISING, "csi", 0);
+			IRQF_TRIGGER_RISING | IRQF_ONESHOT, "csi", 0);
 		if (rc < 0)
 			goto csi_irq_fail;
 		/* enable required clocks for CSI */

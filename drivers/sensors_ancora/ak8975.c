@@ -314,7 +314,7 @@ static int akm8975_setup_irq(struct akm8975_data *akm)
 	/* trigger high so we don't miss initial interrupt if it
 	 * is already pendingtlmn
 	 */
-	rc = request_threaded_irq(irq, NULL, akm8975_irq_handler, IRQF_TRIGGER_RISING,
+	rc = request_threaded_irq(irq, NULL, akm8975_irq_handler, IRQF_TRIGGER_RISING | IRQF_ONESHOT,
 			 "akm_int", akm);
 	if (rc < 0) {
 		pr_err("%s: request_irq(%d) failed for gpio %d (%d)\n",

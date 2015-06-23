@@ -547,7 +547,7 @@ static int gp2a_opt_probe( struct platform_device* pdev )
 	
 	/* INT Settings */	
   	err = request_threaded_irq( IRQ_GP2A_INT , 
-		NULL, gp2a_irq_handler, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING	, "proximity_int", gp2a);
+		NULL, gp2a_irq_handler, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, "proximity_int", gp2a);
 
 	if (err < 0) {
 		printk(KERN_ERR "failed to request proximity_irq\n");
