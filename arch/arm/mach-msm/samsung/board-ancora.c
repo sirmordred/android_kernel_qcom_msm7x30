@@ -7294,17 +7294,6 @@ early_param("pmem_adsp_size", pmem_adsp_size_setup);
 */
 
 #ifdef CONFIG_ION_MSM
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
-static struct ion_co_heap_pdata co_ion_pdata = {
-	.adjacent_mem_id = INVALID_HEAP_ID,
-	.align = PAGE_SIZE,
-};
-
-static struct ion_co_heap_pdata co_mm_ion_pdata = {
-	.adjacent_mem_id = INVALID_HEAP_ID,
-	.align = PAGE_SIZE,
-};
-
 #ifdef CONFIG_MSM_ION_MM_USE_CMA
 static struct platform_device ion_cma_heap_device = {
 	.name = "ion-cma-heap-device",
@@ -7314,7 +7303,6 @@ static struct platform_device ion_cma_heap_device = {
 		.coherent_dma_mask = DMA_BIT_MASK(32),
 	}
 };
-#endif
 #endif
 
 /**
@@ -7333,8 +7321,6 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_CP_MM_HEAP_ID,
 			.type	= MSM_ION_MM_HEAP_TYPE,
 			.name	= ION_MM_HEAP_NAME,
-			.memory_type = ION_EBI_TYPE,
-			.extra_data = (void *)&co_mm_ion_pdata,
 #ifdef CONFIG_MSM_ION_MM_USE_CMA
 			.priv	= (void *)&ion_cma_heap_device.dev,
 #endif
@@ -7344,8 +7330,6 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_AUDIO_HEAP_ID,
 			.type	= ION_HEAP_TYPE_DMA,
 			.name	= ION_AUDIO_HEAP_NAME,
-			.memory_type = ION_EBI_TYPE,
-			.extra_data = (void *)&co_ion_pdata,
 			.priv	= (void *)&ion_cma_heap_device.dev,
 		},
 		/* PMEM_MDP = SF */
@@ -7353,8 +7337,6 @@ struct ion_platform_heap msm7x30_heaps[] = {
 			.id	= ION_SF_HEAP_ID,
 			.type	= ION_HEAP_TYPE_DMA,
 			.name	= ION_SF_HEAP_NAME,
-			.memory_type = ION_EBI_TYPE,
-			.extra_data = (void *)&co_ion_pdata,
 			.priv	= (void *)&ion_cma_heap_device.dev,
 		},
 #endif
