@@ -7003,6 +7003,8 @@ static void __init msm7x30_init(void)
 {
 	int rc;
 	unsigned smem_size;
+	unsigned int boot_reason;
+
 	uint32_t usb_hub_gpio_cfg_value = GPIO_CFG(56,
 						0,
 						GPIO_CFG_OUTPUT,
