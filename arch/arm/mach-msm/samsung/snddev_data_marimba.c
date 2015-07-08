@@ -4325,23 +4325,6 @@ extern int a2220_ioctl2(unsigned int cmd , unsigned long arg);
 
 void __ref msm_snddev_init(void)
 {
-	if (machine_is_msm7x30_ffa() || machine_is_msm8x55_ffa() ||
-		machine_is_msm8x55_svlte_ffa()) {
-		platform_add_devices(snd_devices_ffa,
-		ARRAY_SIZE(snd_devices_ffa));
-#ifdef CONFIG_DEBUG_FS
-		debugfs_hsed_config = debugfs_create_file("msm_hsed_config",
-					S_IFREG | S_IRUGO, NULL,
-		(void *) "msm_hsed_config", &snddev_hsed_config_debug_fops);
-#endif
-	} else if (machine_is_msm7x30_surf() || machine_is_msm8x55_surf() ||
-		machine_is_msm8x55_svlte_surf())
-		platform_add_devices(snd_devices_surf,
-		ARRAY_SIZE(snd_devices_surf));
-	else if (machine_is_msm7x30_fluid())
-		platform_add_devices(snd_devices_fluid,
-		ARRAY_SIZE(snd_devices_fluid));
-	else
 #if SAMSUNG_AUDIO_PATH
 #ifdef CONFIG_MACH_ARIESVE
    		platform_add_devices(snd_devices_ariesve,

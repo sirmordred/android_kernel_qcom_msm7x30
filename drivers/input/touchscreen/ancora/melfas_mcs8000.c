@@ -21,11 +21,9 @@
 #include <linux/delay.h>
 #include <linux/irq.h>
 #include <linux/kernel.h>
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#include <linux/earlysuspend.h>
-#endif
 #include <linux/miscdevice.h>
-
+#include <linux/notifier.h>
+#include <linux/fb.h>
 #include <asm/io.h>
 #include <asm/gpio.h>
 #include <linux/regulator/consumer.h>
@@ -145,17 +143,12 @@ struct mcs8000_ts_driver {
 	struct input_info info;
 	int suspended;
 	atomic_t keypad_enable;
-	struct early_suspend	early_suspend;
+	struct notifier_block fb_notif;
 };
 
 struct mcs8000_ts_driver *melfas_mcs8000_ts = NULL;
 struct i2c_driver mcs8000_ts_i2c;
 struct workqueue_struct *melfas_mcs8000_ts_wq;
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-void melfas_mcs8000_ts_early_suspend(struct early_suspend *h);
-void melfas_mcs8000_ts_late_resume(struct early_suspend *h);
-#endif	/* CONFIG_HAS_EARLYSUSPEND */
 
 #ifdef SEC_TSP
 static int testmode = 0;
@@ -186,6 +179,9 @@ EXPORT_SYMBOL(touch_class);
 struct device *firmware_dev;
 EXPORT_SYMBOL(firmware_dev);
 #endif
+
+static int fb_notifier_callback(struct notifier_block *self,
+	unsigned long event, void *data);
 
 #ifdef AUTO_POWER_ON_OFF_FLAG
 static struct timer_list poweroff_touch_timer;
@@ -703,6 +699,27 @@ void firmware_update()
 		mcsdl_vdd_on();
 		mdelay(200);
 	}
+}
+
+static int fb_notifier_callback(struct notifier_block *self,
+	unsigned long event, void *data)
+{
+	struct fb_event *evdata = data;
+	int *blank;
+	struct mcs8000_ts_driver *ts =
+		container_of(self, struct mcs8000_ts_driver, fb_notif);
+
+	if (evdata && evdata->data && melfas_mcs8000_ts->client) {
+		if (event == FB_EVENT_BLANK) {
+			blank = evdata->data;
+			if (*blank == FB_BLANK_UNBLANK)
+				melfas_mcs8000_ts_resume();
+			else if (*blank == FB_BLANK_POWERDOWN)
+				melfas_mcs8000_ts_suspend(PMSG_SUSPEND);
+		}
+	}
+
+	return 0;
 }
 
 void firmware_update_manual()
@@ -2290,6 +2307,14 @@ int melfas_mcs8000_ts_probe(struct i2c_client *client,
 
 	atomic_set(&melfas_mcs8000_ts->keypad_enable, 1);
 
+	melfas_mcs8000_ts->fb_notif.notifier_call = fb_notifier_callback;
+	ret = fb_register_client(&melfas_mcs8000_ts->fb_notif);
+	if (ret) {
+		pr_err("%s: Failed to register fb_notifier ret=%d\n",
+			__func__, ret);
+		goto err_cleanup_fb_notif;
+	}
+
 	printk("melfas_mcs8000_ts_probe: max_x: %d, max_y: %d\n", max_x, max_y);
 
 	ret = input_register_device(melfas_mcs8000_ts->input_dev);
@@ -2310,13 +2335,6 @@ int melfas_mcs8000_ts_probe(struct i2c_client *client,
 
 	printk("[Melfas] ret : %d, melfas_mcs8000_ts->client name : [%s]  [%d] [0x%x]\n",ret,melfas_mcs8000_ts->client->name, melfas_mcs8000_ts->client->irq, melfas_mcs8000_ts->client->addr);
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	melfas_mcs8000_ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-	melfas_mcs8000_ts->early_suspend.suspend = melfas_mcs8000_ts_early_suspend;
-	melfas_mcs8000_ts->early_suspend.resume = melfas_mcs8000_ts_late_resume;
-	register_early_suspend(&melfas_mcs8000_ts->early_suspend);
-#endif	/* CONFIG_HAS_EARLYSUSPEND */
-
 #ifdef AUTO_POWER_ON_OFF_FLAG
 	init_timer(&poweroff_touch_timer);
 	poweroff_touch_timer.function = poweroff_touch_timer_handler;
@@ -2327,7 +2345,8 @@ int melfas_mcs8000_ts_probe(struct i2c_client *client,
 	return 0;
 err_input_register_device_failed:
 	input_free_device(melfas_mcs8000_ts->input_dev);
-
+err_cleanup_fb_notif:
+	fb_unregister_client(&melfas_mcs8000_ts->fb_notif);
 err_input_dev_alloc_failed:
 	kfree(melfas_mcs8000_ts);
 err_check_functionality_failed:
@@ -2337,11 +2356,9 @@ err_check_functionality_failed:
 
 int melfas_mcs8000_ts_remove(struct i2c_client *client)
 {
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	unregister_early_suspend(&melfas_mcs8000_ts->early_suspend);
-#endif	/* CONFIG_HAS_EARLYSUSPEND */
 	free_irq(melfas_mcs8000_ts->client->irq, 0);
 	input_unregister_device(melfas_mcs8000_ts->input_dev);
+	fb_unregister_client(&melfas_mcs8000_ts->fb_notif);
 	return 0;
 }
 
@@ -2436,18 +2453,6 @@ int melfas_mcs8000_ts_resume()
     return 0;
 }
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-void melfas_mcs8000_ts_early_suspend(struct early_suspend *h)
-{
-	melfas_mcs8000_ts_suspend(PMSG_SUSPEND);
-}
-
-void melfas_mcs8000_ts_late_resume(struct early_suspend *h)
-{
-	melfas_mcs8000_ts_resume();
-}
-#endif	/* CONFIG_HAS_EARLYSUSPEND */
-
 
 int melfas_mcs8000_i2c_probe(struct i2c_client *client,const struct i2c_device_id *id)
 {
@@ -2464,9 +2469,6 @@ EXPORT_SYMBOL(set_tsp_for_ta_detect);
 
 static int melfas_mcs8000_i2c_remove(struct i2c_client *client)
 {
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	unregister_early_suspend(&melfas_mcs8000_ts->early_suspend);
-#endif  /* CONFIG_HAS_EARLYSUSPEND */
 	free_irq(melfas_mcs8000_ts->client->irq, 0);
 	input_unregister_device(melfas_mcs8000_ts->input_dev);
    

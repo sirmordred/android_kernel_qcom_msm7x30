@@ -5,14 +5,14 @@ endif
 obj-y += clock.o clock-voter.o clock-dummy.o
 obj-y += modem_notifier.o subsystem_map.o
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
-obj-$(CONFIG_DEBUG_FS) += clock-debug.o
+obj-$(CONFIG_DEBUG_FS) += clock-debug.o smd_rpc_sym.o
 
 obj-$(CONFIG_MSM_PROC_COMM) += proc_comm.o
 obj-$(CONFIG_MSM_PROC_COMM) += clock-pcom.o
 obj-$(CONFIG_MSM_PROC_COMM) += vreg.o mpp.o
 ifdef CONFIG_MSM_PROC_COMM
 	obj-$(CONFIG_REGULATOR) += footswitch-pcom.o
-	obj-$(CONFIG_DEBUG_FS) += pmic_debugfs.o
+	obj-$(CONFIG_DEBUG_FS)	+= pmic_debugfs.o
 endif
 
 obj-y += acpuclock.o
@@ -37,7 +37,6 @@ obj-$(CONFIG_MSM_SMD_PKT) += smd_pkt.o
 obj-$(CONFIG_MSM_SMD_NMEA) += smd_nmea.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_device.o
-obj-$(CONFIG_DEBUG_FS) += smd_rpc_sym.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_servers.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_clients.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_xdr.o
@@ -59,8 +58,7 @@ obj-$(CONFIG_MSM_IDLE_STATS) += pm-stats.o
 obj-$(CONFIG_MSM_PM2) += pm2.o
 obj-$(CONFIG_MSM_SPM_V1) += spm.o
 obj-$(CONFIG_ARCH_MSM7X30) += acpuclock-7x30.o clock-7x30.o clock-local.o clock-pll.o
-obj-$(CONFIG_ARCH_MSM7X30) += gpiomux-7x30.o gpiomux-v1.o gpiomux.o
-obj-$(CONFIG_ARCH_MSM7X30) += devices-msm7x30.o
+obj-$(CONFIG_ARCH_MSM7X30) += gpiomux-v1.o gpiomux.o
 
 obj-$(CONFIG_MACH_HUAWEI) += huawei/
 obj-$(CONFIG_MACH_SEMC) += semc/

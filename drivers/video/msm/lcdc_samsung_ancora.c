@@ -962,94 +962,94 @@ static int __init lcdc_samsung_panel_init(void)
 		return 0;
 	}
 #endif
-if (board_lcd_hw_revision==1) { //for  smd 
+	if (board_lcd_hw_revision==1) { //for  smd 
 
-	ret = platform_driver_register(&this_driver);
-	if (ret) {
-		pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
-		return ret;
-	}
+		ret = platform_driver_register(&this_driver);
+		if (ret) {
+			pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
+			return ret;
+		}
 
-	pinfo = &samsung_panel_data.panel_info;
-	pinfo->xres = LCDC_FB_XRES;
-	pinfo->yres = LCDC_FB_YRES;
-	pinfo->type = LCDC_PANEL;
-	pinfo->pdest = DISPLAY_1;
-	pinfo->wait_cycle = 0;
-	pinfo->bpp = 24;
-	pinfo->fb_num = 2;
-	pinfo->clk_rate = 24576000;
-	pinfo->bl_max = 255;
-	pinfo->bl_min = 1;
+		pinfo = &samsung_panel_data.panel_info;
+		pinfo->xres = LCDC_FB_XRES;
+		pinfo->yres = LCDC_FB_YRES;
+		pinfo->type = LCDC_PANEL;
+		pinfo->pdest = DISPLAY_1;
+		pinfo->wait_cycle = 0;
+		pinfo->bpp = 24;
+		pinfo->fb_num = 2;
+		pinfo->clk_rate = 24576000;
+		pinfo->bl_max = 255;
+		pinfo->bl_min = 1;
 
-	pinfo->lcdc.h_back_porch = SMD_LCDC_HBP;
-	pinfo->lcdc.h_front_porch = SMD_LCDC_HFP;
-	pinfo->lcdc.h_pulse_width = SMD_LCDC_HPW;
-	pinfo->lcdc.v_back_porch = SMD_LCDC_VBP;
-	pinfo->lcdc.v_front_porch = SMD_LCDC_VFP;
-	pinfo->lcdc.v_pulse_width = SMD_LCDC_VPW;
-	pinfo->lcdc.border_clr = 0;     /* blk */
-	pinfo->lcdc.underflow_clr = 0xff;       /* blue */
-	pinfo->lcdc.hsync_skew = 0;
+		pinfo->lcdc.h_back_porch = SMD_LCDC_HBP;
+		pinfo->lcdc.h_front_porch = SMD_LCDC_HFP;
+		pinfo->lcdc.h_pulse_width = SMD_LCDC_HPW;
+		pinfo->lcdc.v_back_porch = SMD_LCDC_VBP;
+		pinfo->lcdc.v_front_porch = SMD_LCDC_VFP;
+		pinfo->lcdc.v_pulse_width = SMD_LCDC_VPW;
+		pinfo->lcdc.border_clr = 0;     /* blk */
+		pinfo->lcdc.underflow_clr = 0xff;       /* blue */
+		pinfo->lcdc.hsync_skew = 0;
 
-} else if(board_lcd_hw_revision==3) { //for HYDIS
+	} else if(board_lcd_hw_revision==3) { //for HYDIS
 	
-	ret = platform_driver_register(&this_driver);
-	if (ret) {
-		pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
-		return ret;
+		ret = platform_driver_register(&this_driver);
+		if (ret) {
+			pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
+			return ret;
+		}
+		pinfo = &samsung_panel_data.panel_info;
+		pinfo->xres = LCDC_FB_XRES;
+		pinfo->yres = LCDC_FB_YRES;
+		pinfo->type = LCDC_PANEL;
+		pinfo->pdest = DISPLAY_1;
+		pinfo->wait_cycle = 0;
+		pinfo->bpp = 24;
+		pinfo->fb_num = 2;
+		pinfo->clk_rate = 24576000;
+		pinfo->bl_max = 255;
+		pinfo->bl_min = 1;
+
+		pinfo->lcdc.h_back_porch = HYDIS_LCDC_HBP;
+		pinfo->lcdc.h_front_porch = HYDIS_LCDC_HFP;
+		pinfo->lcdc.h_pulse_width = HYDIS_LCDC_HPW;
+		pinfo->lcdc.v_back_porch = HYDIS_LCDC_VBP;
+		pinfo->lcdc.v_front_porch = HYDIS_LCDC_VFP;
+		pinfo->lcdc.v_pulse_width = HYDIS_LCDC_VPW;
+		pinfo->lcdc.border_clr = 0;     /* blk */
+		pinfo->lcdc.underflow_clr = 0xff;       /* blue */
+		pinfo->lcdc.hsync_skew = 0;
+
+	} else { //for etc...
+
+		ret = platform_driver_register(&this_driver);
+		if (ret) {
+			pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
+			return ret;
+		}
+		pinfo = &samsung_panel_data.panel_info;
+		pinfo->xres = LCDC_FB_XRES;
+		pinfo->yres = LCDC_FB_YRES;
+		pinfo->type = LCDC_PANEL;
+		pinfo->pdest = DISPLAY_1;
+		pinfo->wait_cycle = 0;
+		pinfo->bpp = 24;
+		pinfo->fb_num = 2;
+		pinfo->clk_rate = 24576000;
+		pinfo->bl_max = 255;
+		pinfo->bl_min = 1;
+
+		pinfo->lcdc.h_back_porch = LCDC_HBP;
+		pinfo->lcdc.h_front_porch = LCDC_HFP;
+		pinfo->lcdc.h_pulse_width = LCDC_HPW;
+		pinfo->lcdc.v_back_porch = LCDC_VBP;
+		pinfo->lcdc.v_front_porch = LCDC_VFP;
+		pinfo->lcdc.v_pulse_width = LCDC_VPW;
+		pinfo->lcdc.border_clr = 0;     /* blk */
+		pinfo->lcdc.underflow_clr = 0xff;       /* blue */
+		pinfo->lcdc.hsync_skew = 0;
 	}
-	pinfo = &samsung_panel_data.panel_info;
-	pinfo->xres = LCDC_FB_XRES;
-	pinfo->yres = LCDC_FB_YRES;
-	pinfo->type = LCDC_PANEL;
-	pinfo->pdest = DISPLAY_1;
-	pinfo->wait_cycle = 0;
-	pinfo->bpp = 24;
-	pinfo->fb_num = 2;
-	pinfo->clk_rate = 24576000;
-	pinfo->bl_max = 255;
-	pinfo->bl_min = 1;
-
-	pinfo->lcdc.h_back_porch = HYDIS_LCDC_HBP;
-	pinfo->lcdc.h_front_porch = HYDIS_LCDC_HFP;
-	pinfo->lcdc.h_pulse_width = HYDIS_LCDC_HPW;
-	pinfo->lcdc.v_back_porch = HYDIS_LCDC_VBP;
-	pinfo->lcdc.v_front_porch = HYDIS_LCDC_VFP;
-	pinfo->lcdc.v_pulse_width = HYDIS_LCDC_VPW;
-	pinfo->lcdc.border_clr = 0;     /* blk */
-	pinfo->lcdc.underflow_clr = 0xff;       /* blue */
-	pinfo->lcdc.hsync_skew = 0;
-
-} else { //for etc...
-
-	ret = platform_driver_register(&this_driver);
-	if (ret) {
-		pr_err("%s: driver register failed, rc=%d\n", __func__, ret);
-		return ret;
-	}
-	pinfo = &samsung_panel_data.panel_info;
-	pinfo->xres = LCDC_FB_XRES;
-	pinfo->yres = LCDC_FB_YRES;
-	pinfo->type = LCDC_PANEL;
-	pinfo->pdest = DISPLAY_1;
-	pinfo->wait_cycle = 0;
-	pinfo->bpp = 24;
-	pinfo->fb_num = 2;
-	pinfo->clk_rate = 24576000;
-	pinfo->bl_max = 255;
-	pinfo->bl_min = 1;
-
-	pinfo->lcdc.h_back_porch = LCDC_HBP;
-	pinfo->lcdc.h_front_porch = LCDC_HFP;
-	pinfo->lcdc.h_pulse_width = LCDC_HPW;
-	pinfo->lcdc.v_back_porch = LCDC_VBP;
-	pinfo->lcdc.v_front_porch = LCDC_VFP;
-	pinfo->lcdc.v_pulse_width = LCDC_VPW;
-	pinfo->lcdc.border_clr = 0;     /* blk */
-	pinfo->lcdc.underflow_clr = 0xff;       /* blue */
-	pinfo->lcdc.hsync_skew = 0;
-}
 
 	ret = platform_device_register(&this_device);
 	if (ret) {
@@ -1071,8 +1071,8 @@ fail_driver:
 static int lcdc_samsung_panel_on_esd(struct platform_device *pdev)
 {
 	pr_info("%s\n", __func__);
-	if (!samsung_state.disp_initialized) {
 
+	if (!samsung_state.disp_initialized) {
 		acpuclk_usr_set_max();
 		lcdc_samsung_pdata->panel_config_gpio(1);
 		samsung_spi_init();

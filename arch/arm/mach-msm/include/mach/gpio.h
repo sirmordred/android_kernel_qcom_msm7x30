@@ -137,8 +137,8 @@ enum {
 	GPIO_CFG_DISABLE,
 };
 
-#define GPIO_CFG(gpio, func, dir, pull, drvstr) \
-	((((gpio) & 0x3FF) << 4)        |	  \
+#define GPIO_CFG(gpio, func, dir, pull, drvstr)   \
+	 ((((gpio) & 0x3FF) << 4)        |	  \
 	 ((func) & 0xf)                  |	  \
 	 (((dir) & 0x1) << 14)           |	  \
 	 (((pull) & 0x3) << 15)          |	  \

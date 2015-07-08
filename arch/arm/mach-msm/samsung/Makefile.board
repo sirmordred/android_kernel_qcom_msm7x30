@@ -1,3 +1,3 @@
-obj-$(CONFIG_MACH_ANCORA) += board-ancora.o board-ancora-regulator.o
-obj-$(CONFIG_BCMDHD) += broadcom_wlan.o
+obj-$(CONFIG_MACH_ANCORA) += board-ancora.o board-ancora-regulator.o devices-msm7x30.o gpiomux-7x30.o
+obj-$(CONFIG_BCM4329) += broadcom_wlan.o
 obj-$(CONFIG_MARIMBA_CODEC) += snddev_data_marimba.o

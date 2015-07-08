@@ -264,7 +264,7 @@ struct interrupt_stat {
 };
 extern struct interrupt_stat interrupt_stats[NUM_SMD_SUBSYSTEMS];
 
-#if (defined(CONFIG_MACH_ARIESVE) || defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_ANCORA_TMO) || defined(CONFIG_MACH_APACHE)
+#if defined(CONFIG_MACH_ARIESVE) || defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_ANCORA_TMO) || defined(CONFIG_MACH_APACHE)
 #define SMEM_VENDOR1_CAPTURE_BUF_SIZE (128*1024)
 
 typedef struct SMEM_VENDOR1_ID_TYPE

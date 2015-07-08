@@ -47,6 +47,8 @@
 #include "sd_ops.h"
 #include "sdio_ops.h"
 
+#include "../host/msm_sdcc.h"
+
 /* If the device is not responding */
 #define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
 
@@ -3125,6 +3127,9 @@ int mmc_suspend_host(struct mmc_host *host)
 	if (!err && !mmc_card_keep_power(host))
 		mmc_power_off(host);
 
+	if (host->card && host->card->type == MMC_TYPE_SD)
+		mdelay(50);
+
 out:
 	return err;
 }
@@ -3188,6 +3193,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
 {
 	struct mmc_host *host = container_of(
 		notify_block, struct mmc_host, pm_notify);
+	struct msmsdcc_host *msmhost = mmc_priv(host);
 	unsigned long flags;
 	int err = 0;
 
@@ -3240,6 +3246,11 @@ int mmc_pm_notify(struct notifier_block *notify_block,
 		}
 		host->rescan_disable = 0;
 		spin_unlock_irqrestore(&host->lock, flags);
+
+		if (host->card && msmhost && msmhost->pdev_id == 1)
+			printk(KERN_INFO"%s(): WLAN SKIP DETECT CHANGE\n",
+					__func__);
+
 		mmc_detect_change(host, 0);
 
 	}

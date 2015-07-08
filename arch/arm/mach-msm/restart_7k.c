@@ -23,6 +23,7 @@
 #include <linux/gpio.h>
 #include <linux/delay.h>
 #include <mach/msm_iomap.h>
+#include "smd_rpcrouter.h"
 
 static uint32_t restart_reason = 0x776655AA;
 

@@ -196,11 +196,6 @@ config FB_MSM_HDMI_MSM_PANEL
 	  Support for 480p/720p/1080i/1080p output through MSM HDMI
 
 choice
-	depends on  (FB_MSM_MDP22 || FB_MSM_MDP31 || FB_MSM_MDP40)
-	prompt "TVOut Region"
-	default FB_MSM_TVOUT_NONE
-
-choice
 	prompt "Default framebuffer color depth"
 	depends on FB_MSM_MDP40 || FB_MSM_MDP31 || FB_MSM_MDP303
 	default FB_MSM_DEFAULT_DEPTH_RGBA8888

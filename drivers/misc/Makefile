@@ -59,11 +59,9 @@ obj-$(CONFIG_PMIC8XXX_NFC)	+= pm8xxx-nfc.o
 obj-$(CONFIG_PMIC8XXX_UPL)	+= pm8xxx-upl.o
 obj-$(CONFIG_PMIC8XXX_VIBRATOR)	+= pm8xxx-vibrator.o
 obj-$(CONFIG_PMIC8058_XOADC)	+= pmic8058-xoadc.o
-ifeq ($(CONFIG_ANDROID_PMEM_ION_WRAPPER),y)
-obj-$(CONFIG_ANDROID_PMEM)	+= pmem_wrapper.o
-else
+obj-$(CONFIG_PMIC8058_PWM)      += pmic8058-pwm.o
+obj-$(CONFIG_ANDROID_PMEM_ION_WRAPPER)	+= pmem_wrapper.o
 obj-$(CONFIG_ANDROID_PMEM)	+= pmem.o
-endif
 obj-$(CONFIG_MSM_MEMORY_LOW_POWER_MODE_SUSPEND_DEEP_POWER_DOWN) \
 	+= msm_migrate_pages.o
 obj-$(CONFIG_LM3560)		+= lm356x.o

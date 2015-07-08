@@ -59,13 +59,12 @@ static int usb_state = 0;
 
 extern int android_usb_get_current_mode(void);
 extern void android_usb_switch(int mode);
-#ifdef CONFIG_USB_EHCI_MSM_72K
+#ifdef CONFIG_USB_MSM_OTG_72K
 #include <mach/msm72k_otg.h>
 #endif
 
 #include <linux/pm.h>
 #include <linux/mfd/pmic8058.h>
-#include <linux/mfd/pmic8901.h>
 #include <mach/msm_iomap.h>
 #include <linux/fs.h>
 #include <linux/syscalls.h>
@@ -96,7 +95,9 @@ enum charger_types {
 	CHARGER_TYPE_USB_PC = 2  /* CHARGER_TYPE_USB_PC */
 };
 
+#ifdef CONFIG_USB_MSM_OTG_72K
 static int otg_charger_type = CHARGER_TYPE_NONE;
+#endif
 
 
 #define dmsg(arg,...) printk("[USB_SWITCH] %s(%d): "arg,__FUNCTION__,__LINE__,##__VA_ARGS__)
@@ -145,7 +146,9 @@ struct fsa9480_data {
 
 int curr_usb_status = 0;
 int curr_ta_status = 0;
+#ifdef CONFIG_USB_MSM_OTG_72K
 int curr_otg_status = 0;
+#endif
 int curr_uart_status = 0;
 EXPORT_SYMBOL(curr_uart_status);
 
@@ -432,10 +435,12 @@ static void fsa9480_chip_init(void)
 	{
 		curr_ta_status = 1;
 	}
+#ifdef CONFIG_USB_MSM_OTG_72K
 	else if (fsa9480_device1 & CRA_USB_OTG)
 	{
 		curr_otg_status = 1;
 	}
+#endif
 	else if (fsa9480_device2 & ( CRB_JIG_UART_OFF | CRB_JIG_UART_ON) )
 	{
 	    MicroJigUARTOffStatus = 1;
@@ -476,8 +481,10 @@ int fsa9480_get_charger_status(void)
 		return CHARGER_TYPE_USB_PC;	// (CHARGER_TYPE_USB_PC)
 	else if (curr_ta_status)
 		return CHARGER_TYPE_WALL;	// (CHARGER_TYPE_WALL)
+#ifdef CONFIG_USB_MSM_OTG_72K
 	else if (curr_otg_status)
 		return otg_charger_type;
+#endif
 	else
 		return CHARGER_TYPE_NONE;	// no charger (CHARGER_TYPE_NONE)
 }
@@ -652,6 +659,7 @@ static ssize_t disable_vbus_store(
 static DEVICE_ATTR(disable_vbus, 0664, disable_vbus_show, disable_vbus_store);
 
 
+#ifdef CONFIG_USB_MSM_OTG_72K
 static void otg_charger_restart(void)
 {
 	int charge;
@@ -697,6 +705,7 @@ static ssize_t otg_charger_type_store(
 	return size;
 }
 static DEVICE_ATTR(otg_charger_type, 0666, otg_charger_type_show, otg_charger_type_store);
+#endif
 
 static void uart_switch_mode(int mode)
 {
@@ -892,8 +901,9 @@ static void fsa9480_process_device(u8 dev1, u8 dev2, u8 attach)
 				      fsa9480_pdata->charger_cb(curr_ta_status);
 #endif
 				break;
+/*
 			case CRA_USB_OTG:
-#ifdef CONFIG_USB_EHCI_MSM_72K
+#ifdef CONFIG_USB_MSM_OTG_72K
 				DEBUG_FSA9480("USB_OTG \n");
 				if (attach & ATTACH) {
 					curr_otg_status = 1;
@@ -908,6 +918,7 @@ static void fsa9480_process_device(u8 dev1, u8 dev2, u8 attach)
 				}
 #endif
 				break;
+*/
 			default:
 				break;
 		}
@@ -1185,7 +1196,7 @@ static void fsa9480_read_interrupt_register(void)
 			set_tsp_for_ta_detect(curr_ta_status);
 		}
 
-		// OTG
+#ifdef CONFIG_USB_MSM_OTG_72K // OTG
 		if(curr_otg_status == 1) {
 			curr_otg_status =0;
 			batt_restart();         
@@ -1195,6 +1206,7 @@ static void fsa9480_read_interrupt_register(void)
 
 			set_tsp_for_ta_detect(curr_otg_status);
 		}
+#endif
 	}
 
 
@@ -1260,8 +1272,10 @@ static int fsa9480_probe(struct i2c_client *client, const struct i2c_device_id *
 		printk(KERN_ERR "[FSA9480]Failed to create device file(%s)!\n",
 					dev_attr_usb_state.attr.name);
 
+#ifdef CONFIG_USB_MSM_OTG_72K
 	if (device_create_file(switch_dev, &dev_attr_otg_charger_type) < 0)
 		printk(KERN_ERR "[FSA9480]: Failed to create device file(%s)!\n", dev_attr_otg_charger_type.attr.name);
+#endif
 
     	indicator_dev.name = DRIVER_NAME;
 	indicator_dev.print_name = print_indicatorswitch_name;

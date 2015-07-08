@@ -20,6 +20,7 @@
 #include <linux/platform_device.h>
 #include <linux/mm.h>
 #include <linux/sched.h>
+#include <linux/slab.h>
 #include <linux/tty.h>
 #include <linux/tty_driver.h>
 #include <linux/tty_flip.h>
@@ -906,7 +907,7 @@ static int dpram_tty_open(struct tty_struct *tty, struct file *file)
 	}
 
 	tty->driver_data = (void *)device;
-	tty->low_latency = 1;
+	tty->port->low_latency = 1;
 
 	return 0;
 }
@@ -1340,7 +1341,6 @@ static struct file_operations dpram_err_ops = {
 };
 #endif	/* _ENABLE_ERROR_DEVICE */
 
-
 static struct tty_operations dpram_tty_ops = {
 	.open = dpram_tty_open,
 	.close = dpram_tty_close,
@@ -1646,15 +1646,12 @@ void power_down_timeout(unsigned long arg)
         pm_power_off();
 }
 
-static int silent_read_proc_debug(char *page, char **start, off_t offset,
-		                    int count, int *eof, void *data)
+int silent_read_proc_debug(struct file *filp, char __user *page, size_t count, loff_t *data)
 {
-	*eof = 1;
 	return sprintf(page, "%u\n", silent_value);
 }
 
-static int silent_write_proc_debug(struct file *file, const char *buffer,
-		                    unsigned long count, void *data)
+int silent_write_proc_debug(struct file *filp, const char __user *buffer, size_t count, loff_t *data)
 {
 	char *buf;
 
@@ -1687,15 +1684,18 @@ static int silent_write_proc_debug(struct file *file, const char *buffer,
 	return count;
 }
 
-static int dump_read_proc_debug(char *page, char **start, off_t offset,
-		                    int count, int *eof, void *data)
+static const struct file_operations silent_fops = {
+	.owner = THIS_MODULE,
+	.read = silent_read_proc_debug,
+	.write = silent_write_proc_debug,
+};
+
+int dump_read_proc_debug(struct file *filp, char __user *page, size_t count, loff_t *data)
 {
-	*eof = 1;
 	return sprintf(page, "%u\n", dump_enable_flag);
 }
 
-static int dump_write_proc_debug(struct file *file, const char *buffer,
-		                    unsigned long count, void *data)
+int dump_write_proc_debug(struct file *filp, const char __user *buffer, size_t count, loff_t *data)
 {
 	char *buf;
 
@@ -1733,14 +1733,18 @@ static int dump_write_proc_debug(struct file *file, const char *buffer,
 	return count;
 }
 
-static int nosim_proc_read(char *page, char **start, off_t offset,
-		                    int count, int *eof, void *data)
+static const struct file_operations dump_fops = {
+	.owner = THIS_MODULE,
+	.read = dump_read_proc_debug,
+	.write = dump_write_proc_debug,
+};
+
+int nosim_proc_read(struct file *filp, char __user *page, size_t count, loff_t *data)
 {
 	return 0;
 }
 
-static int nosim_proc_write(struct file *file, const char *buffer,
-		                    unsigned long count, void *data)
+int nosim_proc_write(struct file *filp, const char __user *buffer, size_t count, loff_t *data)
 {
 	char *buf;
 
@@ -1762,6 +1766,12 @@ static int nosim_proc_write(struct file *file, const char *buffer,
 	kfree(buf);
 	return count;
 }
+
+static const struct file_operations nosim_fops = {
+	.owner = THIS_MODULE,
+	.read = nosim_proc_read,
+	.write = nosim_proc_write,
+};
 
 #ifdef AUTO_POWER_ON_OFF_FLAG
 /* init & cleanup. */
@@ -1794,22 +1804,16 @@ static int __init dpram_init(void)
 
 	// For silent ram dump mode
 	
-	ent = create_proc_entry("silent", S_IRWXUGO, NULL);
-	ent->read_proc = silent_read_proc_debug;
-	ent->write_proc = silent_write_proc_debug;
+	ent = proc_create("silent", S_IRWXUGO, NULL, &silent_fops);
 	smem_flag = (struct smem_info *) smem_alloc(SMEM_ID_VENDOR2, sizeof(struct smem_info));
 	if(smem_flag->info == 0xAEAEAEAE)
 		silent_value = 1;
 
-	ent = create_proc_entry("dump_enable", S_IRWXUGO, NULL);
-	ent->read_proc = dump_read_proc_debug;
-	ent->write_proc = dump_write_proc_debug;
+	ent = proc_create("dump_enable", S_IRWXUGO, NULL, &dump_fops);
 	smem_flag->info = 0xAEAEAEAE;
 	printk("[Silent Value] : %d\n", silent_value);
 
-	ent = create_proc_entry("nosim_handler", S_IRWXUGO, NULL);
-	ent->read_proc = nosim_proc_read;
-	ent->write_proc = nosim_proc_write;
+	ent = proc_create("nosim_handler", S_IRWXUGO, NULL, &nosim_fops);
 
 	if(IS_ERR(sec_class))
 		pr_err("Failed to create class(sec)!\n");
@@ -1850,5 +1854,3 @@ module_exit(dpram_exit);
 MODULE_AUTHOR("SAMSUNG ELECTRONICS CO., LTD");
 MODULE_DESCRIPTION("DPRAM Device Driver for Linux MITs.");
 MODULE_LICENSE("GPL");
-
-

@@ -882,7 +882,6 @@ unsigned int hsusb_get_chg_current_ma(void)
 EXPORT_SYMBOL(hsusb_get_chg_current_ma);
 #endif
 #endif
-#if 1	// (battery/charging)
 void hsusb_chg_vbus_draw_ext(unsigned mA)
 {
 	msm_chg_usb_i_is_available_ext(mA);
@@ -907,4 +906,3 @@ void hsusb_chg_connected_ext(enum chg_type chgtype)
 	msm_chg_usb_charger_connected_ext(chgtype);
 }
 EXPORT_SYMBOL(hsusb_chg_connected_ext);
-#endif

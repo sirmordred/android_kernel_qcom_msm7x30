@@ -23,6 +23,7 @@
 #include <linux/if_arp.h>
 #include <linux/proc_fs.h>
 #include <linux/freezer.h>
+#include <linux/kthread.h>
 #include <linux/tty.h>
 #include <linux/tty_driver.h>
 #include <linux/tty_flip.h>
@@ -658,7 +659,7 @@ static int dpram_thread(void *data)
 
 	dpram_task = current;
 
-	daemonize("dpram_thread");
+	//daemonize("dpram_thread");
 	strcpy(current->comm, "multipdp");
 
 	schedpar.sched_priority = 1;
@@ -1042,7 +1043,7 @@ static int vs_open(struct tty_struct *tty, struct file *filp)
 	}
 
 	tty->driver_data = (void *)dev;
-	tty->low_latency = 1;
+	tty->port->low_latency = 1;
 	dev->vs_dev.tty = tty;
 
 	return 0;
@@ -1920,7 +1921,7 @@ static void dpram_open_work_func(struct work_struct *work)
 	msleep(100);
 
    	/* run DPRAM I/O thread */
-	ret = kernel_thread(dpram_thread, NULL, CLONE_FS | CLONE_FILES);
+	ret = kthread_run(dpram_thread, NULL, "DPRAM kernel thread");
 	if (ret < 0) {
 		EPRINTK("kernel_thread() failed\n");
 		return;
@@ -1965,8 +1966,7 @@ static int __init multipdp_init(void)
 	}
 
 #ifdef CONFIG_PROC_FS
-	create_proc_read_entry(APP_DEVNAME, 0, 0, 
-			       multipdp_proc_read, NULL);
+	proc_create(APP_DEVNAME, 0, multipdp_proc_read, NULL);
 #endif
 
 #ifdef	NO_TTY_DPRAM
@@ -2028,4 +2028,3 @@ module_exit(multipdp_exit);
 MODULE_AUTHOR("SAMSUNG ELECTRONICS CO., LTD");
 MODULE_DESCRIPTION("Multiple PDP Muxer / Demuxer");
 MODULE_LICENSE("GPL");
-

@@ -298,6 +298,7 @@ static void *brcm_wlan_get_country_code(char *ccode)
 static int wlan_wifi_cd = 0;
 static void (*wlan_status_notify_cb)(int card_present, void *dev_id);
 static void *wlan_status_notify_cb_devid;
+
 int wlan_register_status_notify(void (*callback)(int, void *),
 	void *dev_id)
 {
@@ -452,6 +453,5 @@ int __init brcm_wlan_init(void)
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
 	brcm_init_wlan_mem();
 #endif
-
 	return platform_device_register(&brcm_device_wlan);
 }
